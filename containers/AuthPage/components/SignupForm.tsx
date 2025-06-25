@@ -32,7 +32,7 @@ export default function SignupForm({ switchToLogin }: SignupFormProps) {
     }
 
     try {
-      const res = await axios.post("/signup", {
+      const res = await axios.post("/api/auth", {
         name: signupData.userName,
         email: signupData.email,
         password: signupData.password,
