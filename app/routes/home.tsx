@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-// import AuthComponent from "../auth-page";
+import AuthComponent from "../auth-page";
 import QuestionnaireBuilder from "../questionnaire-builder"
 
 export function meta({}: Route.MetaArgs) {
@@ -10,6 +10,6 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <QuestionnaireBuilder />;
-  // return <AuthComponent />;
+  //return <QuestionnaireBuilder />;
+  return <AuthComponent />;
 }

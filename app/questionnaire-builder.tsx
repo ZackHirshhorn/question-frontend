@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
+import { Popover, Transition } from "@headlessui/react";
 import {
   Plus,
   ChevronDown,
@@ -64,7 +65,14 @@ export default function QuestionnaireBuilder() {
 
     setQuestionnaire((prev) => {
       const newCategories = [...prev.template.categories];
-      newCategories[categoryIndex].subCategories.push(newSubCategory);
+      const newSubCategories = [
+        ...newCategories[categoryIndex].subCategories,
+        newSubCategory,
+      ];
+      newCategories[categoryIndex] = {
+        ...newCategories[categoryIndex],
+        subCategories: newSubCategories,
+      };
       return {
         template: {
           ...prev.template,
@@ -82,9 +90,19 @@ export default function QuestionnaireBuilder() {
 
     setQuestionnaire((prev) => {
       const newCategories = [...prev.template.categories];
-      newCategories[categoryIndex].subCategories[subCategoryIndex].topics.push(
-        newTopic
-      );
+      const newSubCategories = [...newCategories[categoryIndex].subCategories];
+      const newTopics = [
+        ...newSubCategories[subCategoryIndex].topics,
+        newTopic,
+      ];
+      newSubCategories[subCategoryIndex] = {
+        ...newSubCategories[subCategoryIndex],
+        topics: newTopics,
+      };
+      newCategories[categoryIndex] = {
+        ...newCategories[categoryIndex],
+        subCategories: newSubCategories,
+      };
       return {
         template: {
           ...prev.template,
@@ -196,110 +214,106 @@ export default function QuestionnaireBuilder() {
 
     return (
       <div key={questionIndex} className="ml-8">
-        <div key={questionIndex} className="ml-8">
-          <div className="mb-2 border border-yellow-200 bg-yellow-50 rounded-md">
-            <div className="p-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <button onClick={() => toggleExpanded(questionId)}>
-                    {isExpanded ? (
-                      <ChevronDown className="h-5 w-5" />
-                    ) : (
-                      <ChevronLeft className="h-5 w-5" />
-                    )}
-                  </button>
-                  <span className="font-medium">{question.q}</span>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button>
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() =>
-                      setEditingItem(isEditing ? null : questionId)
-                    }
-                  >
-                    <Edit className="h-5 w-5" />
-                  </button>
-                  <button>
-                    <MoreHorizontal className="h-5 w-5" />
-                  </button>
-                </div>
+        <div className="mb-2 border border-yellow-200 bg-yellow-50 rounded-md">
+          <div className="p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <button onClick={() => toggleExpanded(questionId)}>
+                  {isExpanded ? (
+                    <ChevronDown className="h-5 w-5" />
+                  ) : (
+                    <ChevronLeft className="h-5 w-5" />
+                  )}
+                </button>
+                <span className="font-medium">{question.q}</span>
               </div>
 
-              {(isExpanded || isEditing) && (
-                <div className="mt-4 space-y-4 border-t pt-4">
+              <div className="flex items-center gap-1">
+                <button>
+                  <Trash2 className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => setEditingItem(isEditing ? null : questionId)}
+                >
+                  <Edit className="h-5 w-5" />
+                </button>
+                <button>
+                  <MoreHorizontal className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {(isExpanded || isEditing) && (
+              <div className="mt-4 space-y-4 border-t pt-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    טקסט השאלה
+                  </label>
+                  <input
+                    type="text"
+                    value={question.q}
+                    onChange={(e) => {
+                      // Update question logic here
+                    }}
+                    className="text-right w-full border rounded px-2 py-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      טקסט השאלה
+                      סוג השאלה
                     </label>
-                    <input
-                      type="text"
-                      value={question.q}
+                    <select
+                      value={question.qType}
                       onChange={(e) => {
-                        // Update question logic here
+                        // Update question type logic here
                       }}
+                      className="w-full border rounded px-2 py-1 text-right"
+                    >
+                      <option value="text">טקסט</option>
+                      <option value="number">מספר</option>
+                      <option value="dropdown">רשימה נפתחת</option>
+                      <option value="checkbox">תיבות סימון</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`required-${questionId}`}
+                      checked={question.required}
+                      onChange={(e) => {
+                        // Update required flag logic here
+                      }}
+                    />
+                    <label
+                      htmlFor={`required-${questionId}`}
+                      className="text-sm"
+                    >
+                      שאלה חובה
+                    </label>
+                  </div>
+                </div>
+
+                {(question.qType === "dropdown" ||
+                  question.qType === "checkbox") && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      אפשרויות (מופרדות בפסיק)
+                    </label>
+                    <textarea
+                      value={question.choice.join(", ")}
+                      onChange={(e) => {
+                        // Update choices logic here
+                      }}
+                      placeholder="אפשרות 1, אפשרות 2, אפשרות 3"
                       className="text-right w-full border rounded px-2 py-1"
                     />
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        סוג השאלה
-                      </label>
-                      <select
-                        value={question.qType}
-                        onChange={(e) => {
-                          // Update question type logic here
-                        }}
-                        className="w-full border rounded px-2 py-1 text-right"
-                      >
-                        <option value="text">טקסט</option>
-                        <option value="number">מספר</option>
-                        <option value="dropdown">רשימה נפתחת</option>
-                        <option value="checkbox">תיבות סימון</option>
-                      </select>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id={`required-${questionId}`}
-                        checked={question.required}
-                        onChange={(e) => {
-                          // Update required flag logic here
-                        }}
-                      />
-                      <label
-                        htmlFor={`required-${questionId}`}
-                        className="text-sm"
-                      >
-                        שאלה חובה
-                      </label>
-                    </div>
-                  </div>
-
-                  {(question.qType === "dropdown" ||
-                    question.qType === "checkbox") && (
-                    <div>
-                      <label className="block text-sm font-medium mb-1">
-                        אפשרויות (מופרדות בפסיק)
-                      </label>
-                      <textarea
-                        value={question.choice.join(", ")}
-                        onChange={(e) => {
-                          // Update choices logic here
-                        }}
-                        placeholder="אפשרות 1, אפשרות 2, אפשרות 3"
-                        className="text-right w-full border rounded px-2 py-1"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -499,29 +513,37 @@ export default function QuestionnaireBuilder() {
                   <Edit className="h-5 w-5" />
                 </button>
 
-                <div className="relative group">
-                  <button className="peer">
+                <Popover className="relative">
+                  <Popover.Button className="focus:outline-none">
                     <MoreHorizontal className="h-5 w-5" />
-                  </button>
-
-                  <div className="hidden group-hover:block absolute right-0 mt-2 w-48 rounded-md border bg-white shadow-md z-10">
-                    <button
-                      onClick={() => addQuestion({ categoryIndex })}
-                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <Plus className="h-5 w-5 ml-2" />
-                      הוסף שאלה
-                    </button>
-
-                    <button
-                      onClick={() => addSubCategory(categoryIndex)}
-                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <Plus className="h-5 w-5 ml-2" />
-                      הוסף תת-קטגוריה
-                    </button>
-                  </div>
-                </div>
+                  </Popover.Button>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-200"
+                    enterFrom="opacity-0 translate-y-1"
+                    enterTo="opacity-100 translate-y-0"
+                    leave="transition ease-in duration-150"
+                    leaveFrom="opacity-100 translate-y-0"
+                    leaveTo="opacity-0 translate-y-1"
+                  >
+                    <Popover.Panel className="absolute right-0 mt-2 w-48 rounded-md border bg-white text-black shadow-md z-10">
+                      <button
+                        onClick={() => addQuestion({ categoryIndex })}
+                        className="flex rounded-md items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
+                      >
+                        <Plus className="h-5 w-5 ml-2" />
+                        הוסף שאלה
+                      </button>
+                      <button
+                        onClick={() => addSubCategory(categoryIndex)}
+                        className="flex rounded-md items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
+                      >
+                        <Plus className="h-5 w-5 ml-2" />
+                        הוסף תת-קטגוריה
+                      </button>
+                    </Popover.Panel>
+                  </Transition>
+                </Popover>
               </div>
             </div>
           </div>
@@ -543,7 +565,7 @@ export default function QuestionnaireBuilder() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
+    <div className="min-h-screen bg-gray-50 text-black" dir="rtl">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4">
@@ -593,7 +615,7 @@ export default function QuestionnaireBuilder() {
       <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">בונה שאלונים</h1>
+            <h1 className="text-2xl font-bold">בניית שאלון</h1>
           </div>
 
           <div className="mb-4">
@@ -630,7 +652,7 @@ export default function QuestionnaireBuilder() {
         </div>
 
         {/* Save Button */}
-        <div className="fixed bottom-6 left-6">
+        <div className="fixed bottom-6 left-6 border px-8 py-3 rounded-md hover:bg-black hover:text-white transition-all">
           <button
             onClick={() => {
               console.log("Saving questionnaire:", questionnaire);
