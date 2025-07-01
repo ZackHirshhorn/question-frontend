@@ -1,5 +1,6 @@
 import { useState, Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
+import ActionHeader from "./../containers/QuestionnaireBuilder/components/action-header";
 import {
   Plus,
   ChevronDown,
@@ -132,15 +133,52 @@ export default function QuestionnaireBuilder() {
         path.topicIndex !== undefined &&
         path.subCategoryIndex !== undefined
       ) {
-        newCategories[path.categoryIndex].subCategories[
-          path.subCategoryIndex
-        ].topics[path.topicIndex].questions.push(newQuestion);
+        const topics = [
+          ...newCategories[path.categoryIndex].subCategories[
+            path.subCategoryIndex
+          ].topics,
+        ];
+        const topic = {
+          ...topics[path.topicIndex],
+          questions: [...topics[path.topicIndex].questions, newQuestion],
+        };
+        topics[path.topicIndex] = topic;
+        const subCategories = [
+          ...newCategories[path.categoryIndex].subCategories,
+        ];
+        subCategories[path.subCategoryIndex] = {
+          ...subCategories[path.subCategoryIndex],
+          topics,
+        };
+        newCategories[path.categoryIndex] = {
+          ...newCategories[path.categoryIndex],
+          subCategories,
+        };
       } else if (path.subCategoryIndex !== undefined) {
-        newCategories[path.categoryIndex].subCategories[
-          path.subCategoryIndex
-        ].questions.push(newQuestion);
+        const subCategories = [
+          ...newCategories[path.categoryIndex].subCategories,
+        ];
+        const subCategory = {
+          ...subCategories[path.subCategoryIndex],
+          questions: [
+            ...subCategories[path.subCategoryIndex].questions,
+            newQuestion,
+          ],
+        };
+        subCategories[path.subCategoryIndex] = subCategory;
+        newCategories[path.categoryIndex] = {
+          ...newCategories[path.categoryIndex],
+          subCategories,
+        };
       } else {
-        newCategories[path.categoryIndex].questions.push(newQuestion);
+        const questions = [
+          ...newCategories[path.categoryIndex].questions,
+          newQuestion,
+        ];
+        newCategories[path.categoryIndex] = {
+          ...newCategories[path.categoryIndex],
+          questions,
+        };
       }
 
       return {
@@ -213,7 +251,7 @@ export default function QuestionnaireBuilder() {
     const isEditing = editingItem === questionId;
 
     return (
-      <div key={questionIndex} className="ml-8">
+      <div key={questionIndex} className="ml-10">
         <div className="mb-2 border border-yellow-200 bg-yellow-50 rounded-md">
           <div className="p-3">
             <div className="flex items-center justify-between">
@@ -330,72 +368,26 @@ export default function QuestionnaireBuilder() {
     const isExpanded = expandedItems.has(topicId);
 
     return (
-      <div key={topicIndex} className="mr-4">
-        <div className="mb-2 border border-orange-200 bg-orange-50 rounded-md">
-          <div className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button onClick={() => toggleExpanded(topicId)}>
-                  {isExpanded ? (
-                    <ChevronDown className="h-5 w-5" />
-                  ) : (
-                    <ChevronLeft className="h-5 w-5" />
-                  )}
-                </button>
-                <span className="font-medium">{topic.name}</span>
-              </div>
-
-              <div className="flex items-center gap-1 relative">
-                <button
-                  onClick={() =>
-                    deleteTopic(categoryIndex, subCategoryIndex, topicIndex)
-                  }
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-
-                <button>
-                  <Edit className="h-5 w-5" />
-                </button>
-
-                <div className="relative group">
-                  <button className="peer">
-                    <MoreHorizontal className="h-5 w-5" />
-                  </button>
-
-                  <div className="hidden group-hover:block absolute right-0 mt-2 w-40 rounded-md border bg-white shadow-md z-10">
-                    <button
-                      onClick={() =>
-                        addQuestion({
-                          categoryIndex,
-                          subCategoryIndex,
-                          topicIndex,
-                        })
-                      }
-                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <Plus className="h-5 w-5 ml-2" />
-                      הוסף שאלה
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {isExpanded && (
-          <div className="mr-4">
-            {topic.questions.map((question, qIndex) =>
-              renderQuestion(question, qIndex, {
-                categoryIndex,
-                subCategoryIndex,
-                topicIndex,
-              })
-            )}
-          </div>
-        )}
-      </div>
+      <ActionHeader
+        title={topic.name}
+        isExpanded={isExpanded}
+        onToggle={() => toggleExpanded(topicId)}
+        onDelete={() =>
+          deleteTopic(categoryIndex, subCategoryIndex, topicIndex)
+        }
+        onEdit={() => setEditingItem(topicId)}
+        moreActions={
+          <button
+            onClick={() =>
+              addQuestion({ categoryIndex, subCategoryIndex, topicIndex })
+            }
+            className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
+          >
+            <Plus className="h-5 w-5 ml-2" />
+            הוסף שאלה
+          </button>
+        }
+      />
     );
   };
 
@@ -408,7 +400,7 @@ export default function QuestionnaireBuilder() {
     const isExpanded = expandedItems.has(subCategoryId);
 
     return (
-      <div key={subCategoryIndex} className="mr-4">
+      <div key={subCategoryIndex} className="ml-5">
         <div className="mb-2 border border-green-200 bg-green-50 rounded-md">
           <div className="p-3">
             <div className="flex items-center justify-between">
@@ -436,31 +428,41 @@ export default function QuestionnaireBuilder() {
                   <Edit className="h-5 w-5" />
                 </button>
 
-                <div className="relative group">
-                  <button className="peer">
+                <Popover className="relative">
+                  <Popover.Button className="focus:outline-none">
                     <MoreHorizontal className="h-5 w-5" />
-                  </button>
-
-                  <div className="hidden group-hover:block absolute right-0 mt-2 w-48 rounded-md border bg-white shadow-md z-10">
-                    <button
-                      onClick={() =>
-                        addQuestion({ categoryIndex, subCategoryIndex })
-                      }
-                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <Plus className="h-5 w-5 ml-2" />
-                      הוסף שאלה
-                    </button>
-
-                    <button
-                      onClick={() => addTopic(categoryIndex, subCategoryIndex)}
-                      className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <Plus className="h-5 w-5 ml-2" />
-                      הוסף נושא
-                    </button>
-                  </div>
-                </div>
+                  </Popover.Button>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-200"
+                    enterFrom="opacity-0 translate-y-1"
+                    enterTo="opacity-100 translate-y-0"
+                    leave="transition ease-in duration-150"
+                    leaveFrom="opacity-100 translate-y-0"
+                    leaveTo="opacity-0 translate-y-1"
+                  >
+                    <Popover.Panel className="absolute right-0 mt-2 w-48 rounded-md border bg-white text-black shadow-md z-10">
+                      <button
+                        onClick={() =>
+                          addQuestion({ categoryIndex, subCategoryIndex })
+                        }
+                        className="flex rounded-md items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
+                      >
+                        <Plus className="h-5 w-5 ml-2" />
+                        הוסף שאלה
+                      </button>
+                      <button
+                        onClick={() =>
+                          addTopic(categoryIndex, subCategoryIndex)
+                        }
+                        className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
+                      >
+                        <Plus className="h-5 w-5 ml-2" />
+                        הוסף נושא
+                      </button>
+                    </Popover.Panel>
+                  </Transition>
+                </Popover>
               </div>
             </div>
           </div>

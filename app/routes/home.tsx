@@ -10,6 +10,6 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  //return <QuestionnaireBuilder />;
+  return <QuestionnaireBuilder />;
   return <AuthComponent />;
 }

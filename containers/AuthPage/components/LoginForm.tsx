@@ -20,8 +20,7 @@ export default function LoginForm() {
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/auth/login", loginData);
-      localStorage.setItem("token", res.data.token);
+      await axios.post("/api/auth/login", loginData);
       alert("Logged in successfully!");
     } catch (err: any) {
       alert(err.response?.data?.message || "Login failed.");
