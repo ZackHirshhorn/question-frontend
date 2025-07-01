@@ -366,6 +366,7 @@ export default function QuestionnaireBuilder() {
   ) => {
     const topicId = `topic-${categoryIndex}-${subCategoryIndex}-${topicIndex}`;
     const isExpanded = expandedItems.has(topicId);
+    
 
     return (
       <ActionHeader
