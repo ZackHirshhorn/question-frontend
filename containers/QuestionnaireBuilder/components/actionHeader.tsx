@@ -16,7 +16,7 @@ type ActionHeaderProps = {
   onDelete?: () => void;
   onEdit?: () => void;
   showEdit?: boolean;
-  moreActions?: ReactNode; // JSX content for Popover
+  moreActions?: ReactNode;
 };
 
 const ActionHeader = ({
