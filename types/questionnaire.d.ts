@@ -1,7 +1,7 @@
 export interface Question {
   q: string
   choice?: string[]
-  qType: "text" | "number" | "select" | "checkbox"
+  qType: "text" | "number" | "select" | "checkbox" | "radiobox"
   required: boolean
   answer: string
 }

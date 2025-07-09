@@ -1,12 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useExpandedSet } from "containers/QuestionnaireBuilder/hooks/toggleExpanded";
 import { buildId } from "containers/QuestionnaireBuilder/utils/build-id";
 import { ToggleBox } from "containers/QuestionnaireBuilder/components/toggleBox";
-import {
-  Plus,
-  Menu,
-  Search,
-} from "lucide-react";
+import { Plus, Menu, Search } from "lucide-react";
 import type {
   QuestionnaireData,
   Category,
@@ -14,6 +10,7 @@ import type {
   Topic,
   Question,
 } from "../../types/questionnaire";
+import axios from "axios";
 
 export default function QBuilder() {
   const [questionnaire, setQuestionnaire] = useState<QuestionnaireData>({
@@ -28,74 +25,88 @@ export default function QBuilder() {
   const [activeTab, setActiveTab] = useState("questionnaires");
   const { expandedItems, toggleExpanded, isExpanded } = useExpandedSet();
 
-  const addCategory = () => {
-    const newCategory: Category = {
-      name: `קטגוריה ${questionnaire.template.categories.length + 1}`,
-      questions: [],
-      subCategories: [],
-    };
+  const ActionButton = ({
+    onClick,
+    label,
+  }: {
+    onClick: () => void;
+    label: string;
+  }) => (
+    <button
+      onClick={onClick}
+      className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
+    >
+      <Plus className="h-5 w-5 ml-2" />
+      {label}
+    </button>
+  );
 
-    setQuestionnaire((prev) => ({
-      template: {
-        ...prev.template,
-        categories: [...prev.template.categories, newCategory],
-      },
-    }));
+  // Fetch template from API on mount
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/template")
+      .then((res) => {
+        if (res.data) {
+          setQuestionnaire(res.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch template:", err);
+      });
+  }, []);
+
+  const createCategory = (index: number): Category => ({
+    name: `קטגוריה ${index + 1}`,
+    questions: [],
+    subCategories: [],
+  });
+
+  const createSubCategory = (): SubCategory => ({
+    name: "תת-קטגוריה חדשה",
+    questions: [],
+    topics: [],
+  });
+
+  const createTopic = (): Topic => ({
+    name: "נושא חדש",
+    questions: [],
+  });
+
+  const addCategory = () => {
+    setQuestionnaire((prev) => {
+      const categories = [...prev.template.categories];
+
+      categories.push(createCategory(categories.length));
+
+      return { template: { ...prev.template, categories } };
+    });
   };
 
   const addSubCategory = (categoryIndex: number) => {
-    const newSubCategory: SubCategory = {
-      name: "תת-קטגוריה חדשה",
-      questions: [],
-      topics: [],
-    };
-
     setQuestionnaire((prev) => {
-      const newCategories = [...prev.template.categories];
-      const newSubCategories = [
-        ...newCategories[categoryIndex].subCategories,
-        newSubCategory,
-      ];
-      newCategories[categoryIndex] = {
-        ...newCategories[categoryIndex],
-        subCategories: newSubCategories,
-      };
-      return {
-        template: {
-          ...prev.template,
-          categories: newCategories,
-        },
-      };
+      const categories = [...prev.template.categories];
+      const category = { ...categories[categoryIndex] };
+
+      category.subCategories = [...category.subCategories, createSubCategory()];
+      categories[categoryIndex] = category;
+
+      return { template: { ...prev.template, categories } };
     });
   };
 
   const addTopic = (categoryIndex: number, subCategoryIndex: number) => {
-    const newTopic: Topic = {
-      name: "נושא חדש",
-      questions: [],
-    };
-
     setQuestionnaire((prev) => {
-      const newCategories = [...prev.template.categories];
-      const newSubCategories = [...newCategories[categoryIndex].subCategories];
-      const newTopics = [
-        ...newSubCategories[subCategoryIndex].topics,
-        newTopic,
-      ];
-      newSubCategories[subCategoryIndex] = {
-        ...newSubCategories[subCategoryIndex],
-        topics: newTopics,
-      };
-      newCategories[categoryIndex] = {
-        ...newCategories[categoryIndex],
-        subCategories: newSubCategories,
-      };
-      return {
-        template: {
-          ...prev.template,
-          categories: newCategories,
-        },
-      };
+      const categories = [...prev.template.categories];
+      const category = { ...categories[categoryIndex] };
+      const subCategories = [...category.subCategories];
+      const subCategory = { ...subCategories[subCategoryIndex] };
+
+      subCategory.topics = [...subCategory.topics, createTopic()];
+      subCategories[subCategoryIndex] = subCategory;
+      category.subCategories = subCategories;
+      categories[categoryIndex] = category;
+
+      return { template: { ...prev.template, categories } };
     });
   };
 
@@ -177,14 +188,13 @@ export default function QBuilder() {
   };
 
   const deleteCategory = (categoryIndex: number) => {
-    setQuestionnaire((prev) => ({
-      template: {
-        ...prev.template,
-        categories: prev.template.categories.filter(
-          (_, index) => index !== categoryIndex
-        ),
-      },
-    }));
+    setQuestionnaire((prev) => {
+      const categories = prev.template.categories.filter(
+        (_, i) => i !== categoryIndex
+      );
+
+      return { template: { ...prev.template, categories } };
+    });
   };
 
   const deleteSubCategory = (
@@ -192,16 +202,15 @@ export default function QBuilder() {
     subCategoryIndex: number
   ) => {
     setQuestionnaire((prev) => {
-      const newCategories = [...prev.template.categories];
-      newCategories[categoryIndex].subCategories = newCategories[
-        categoryIndex
-      ].subCategories.filter((_, index) => index !== subCategoryIndex);
-      return {
-        template: {
-          ...prev.template,
-          categories: newCategories,
-        },
-      };
+      const categories = [...prev.template.categories];
+      const category = { ...categories[categoryIndex] };
+
+      category.subCategories = category.subCategories.filter(
+        (_, i) => i !== subCategoryIndex
+      );
+      categories[categoryIndex] = category;
+
+      return { template: { ...prev.template, categories } };
     });
   };
 
@@ -211,17 +220,19 @@ export default function QBuilder() {
     topicIndex: number
   ) => {
     setQuestionnaire((prev) => {
-      const newCategories = [...prev.template.categories];
-      newCategories[categoryIndex].subCategories[subCategoryIndex].topics =
-        newCategories[categoryIndex].subCategories[
-          subCategoryIndex
-        ].topics.filter((_, index) => index !== topicIndex);
-      return {
-        template: {
-          ...prev.template,
-          categories: newCategories,
-        },
-      };
+      const categories = [...prev.template.categories];
+      const category = { ...categories[categoryIndex] };
+      const subCategories = [...category.subCategories];
+      const subCategory = { ...subCategories[subCategoryIndex] };
+
+      subCategory.topics = subCategory.topics.filter(
+        (_, i) => i !== topicIndex
+      );
+      subCategories[subCategoryIndex] = subCategory;
+      category.subCategories = subCategories;
+      categories[categoryIndex] = category;
+
+      return { template: { ...prev.template, categories } };
     });
   };
 
@@ -279,29 +290,21 @@ export default function QBuilder() {
         expanded={expanded}
         toggleExpanded={toggleExpanded}
         title={topic.name}
-        className=""
         onDelete={() =>
           deleteTopic(categoryIndex, subCategoryIndex, topicIndex)
         }
         onEdit={() => setEditingItem(topicId)}
         moreActions={
-          <button
+          <ActionButton
             onClick={() =>
               addQuestion({ categoryIndex, subCategoryIndex, topicIndex })
             }
-            className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-100"
-          >
-            <Plus className="h-5 w-5 ml-2" />
-            הוסף שאלה
-          </button>
+            label="הוסף שאלה"
+          />
         }
       >
-        {topic.questions.map((question, questionIndex) =>
-          renderQuestion(question, questionIndex, {
-            categoryIndex,
-            subCategoryIndex,
-            topicIndex,
-          })
+        {topic.questions.map((q, i) =>
+          renderQuestion(q, i, { categoryIndex, subCategoryIndex, topicIndex })
         )}
       </ToggleBox>
     );
@@ -325,33 +328,26 @@ export default function QBuilder() {
         expanded={expanded}
         toggleExpanded={toggleExpanded}
         title={subCategory.name}
-        className=""
         onDelete={() => deleteSubCategory(categoryIndex, subCategoryIndex)}
         onEdit={() => setEditingItem(subCategoryId)}
         moreActions={
           <>
-            <button
+            <ActionButton
               onClick={() => addQuestion({ categoryIndex, subCategoryIndex })}
-              className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
-            >
-              <Plus className="h-5 w-5 ml-2" />
-              הוסף שאלה
-            </button>
-            <button
+              label="הוסף שאלה"
+            />
+            <ActionButton
               onClick={() => addTopic(categoryIndex, subCategoryIndex)}
-              className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
-            >
-              <Plus className="h-5 w-5 ml-2" />
-              הוסף נושא
-            </button>
+              label="הוסף נושא"
+            />
           </>
         }
       >
-        {subCategory.questions.map((question, qIndex) =>
-          renderQuestion(question, qIndex, { categoryIndex, subCategoryIndex })
+        {subCategory.questions.map((q, i) =>
+          renderQuestion(q, i, { categoryIndex, subCategoryIndex })
         )}
-        {subCategory.topics.map((topic, topicIndex) =>
-          renderTopic(topic, categoryIndex, subCategoryIndex, topicIndex)
+        {subCategory.topics.map((t, i) =>
+          renderTopic(t, categoryIndex, subCategoryIndex, i)
         )}
       </ToggleBox>
     );
@@ -367,33 +363,26 @@ export default function QBuilder() {
         expanded={expanded}
         toggleExpanded={toggleExpanded}
         title={category.name}
-        className=""
         onDelete={() => deleteCategory(categoryIndex)}
         onEdit={() => setEditingItem(categoryId)}
         moreActions={
           <>
-            <button
+            <ActionButton
               onClick={() => addQuestion({ categoryIndex })}
-              className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
-            >
-              <Plus className="h-5 w-5 ml-2" />
-              הוסף שאלה
-            </button>
-            <button
+              label="הוסף שאלה"
+            />
+            <ActionButton
               onClick={() => addSubCategory(categoryIndex)}
-              className="flex items-center w-full px-3 py-2 text-sm hover:bg-gray-200"
-            >
-              <Plus className="h-5 w-5 ml-2" />
-              הוסף תת-קטגוריה
-            </button>
+              label="הוסף תת-קטגוריה"
+            />
           </>
         }
       >
-        {category.questions.map((question, qIndex) =>
-          renderQuestion(question, qIndex, { categoryIndex })
+        {category.questions.map((q, i) =>
+          renderQuestion(q, i, { categoryIndex })
         )}
-        {category.subCategories.map((subCategory, subCategoryIndex) =>
-          renderSubCategory(subCategory, categoryIndex, subCategoryIndex)
+        {category.subCategories.map((sc, i) =>
+          renderSubCategory(sc, categoryIndex, i)
         )}
       </ToggleBox>
     );
@@ -489,9 +478,17 @@ export default function QBuilder() {
         {/* Save Button */}
         <div className="fixed bottom-6 left-6 border px-8 py-3 rounded-md hover:bg-black hover:text-white transition-all">
           <button
-            onClick={() => {
-              console.log("Saving questionnaire:", questionnaire);
-              alert("השאלון נשמר בהצלחה!");
+            onClick={async () => {
+              try {
+                await axios.post(
+                  "http://localhost:5000/api/template",
+                  { template: questionnaire.template } // <-- wrap in { template: ... }
+                );
+                alert("השאלון נשמר בהצלחה!");
+              } catch (err) {
+                alert("שגיאה בשמירת השאלון");
+                console.error(err);
+              }
             }}
           >
             שמור שאלון

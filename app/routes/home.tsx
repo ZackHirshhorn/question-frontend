@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
 import AuthComponent from "./authPage";
+import GetAll from "./getAll";
 
 export function meta({}: Route.MetaArgs) {
   return [

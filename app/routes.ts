@@ -8,5 +8,6 @@ import {
 
 export default [
     index("routes/home.tsx"),
-    route("Questionnaire", "routes/qBuilder.tsx")
+    route("questionnaire", "routes/qBuilder.tsx"),
+    route("getall", "routes/getAll.tsx")
 ] satisfies RouteConfig;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "../../../api/axios";
+import axiosClient from "../../../api/axios";
 
 import Input from "components/Input";
 import PasswordInput from "components/PasswordInput";
@@ -20,7 +20,7 @@ export default function LoginForm() {
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axios.post("/api/auth/login", loginData);
+      await axiosClient.post("/api/auth/login", loginData, { withCredentials: true });
       alert("Logged in successfully!");
     } catch (err: any) {
       alert(err.response?.data?.message || "Login failed.");
