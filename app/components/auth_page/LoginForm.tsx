@@ -1,17 +1,25 @@
 import React, { useState } from "react";
-import axiosClient from "../../../api/axios";
 
-import Input from "components/Input";
-import PasswordInput from "components/PasswordInput";
-import type { LoginData } from "types/auth";
-
+import Input from "~/components/Input";
+import PasswordInput from "~/components/PasswordInput";
+import type { LoginData } from "~/types/auth";
+import { login } from "app/auth/authSlice"
+import { useAppDispatch } from 'app/store';
 import { Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginForm() {
   const [loginData, setLoginData] = useState<LoginData>({
     email: "",
     password: "",
   });
+
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogin = (email: string, password: string) => {
+    dispatch(login({ email, password })).unwrap();
+  };
 
   const handleLoginChange = (field: keyof LoginData, value: string) => {
     setLoginData((prev) => ({ ...prev, [field]: value }));
@@ -20,8 +28,8 @@ export default function LoginForm() {
   const handleLoginSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await axiosClient.post("/api/auth/login", loginData, { withCredentials: true });
-      alert("Logged in successfully!");
+      await handleLogin(loginData.email, loginData.password);
+      navigate("/");
     } catch (err: any) {
       alert(err.response?.data?.message || "Login failed.");
     }

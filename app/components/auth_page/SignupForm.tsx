@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import axios from "../../../api/axios";
+import axios from "~/api/axios";
 
-import Input from "components/Input";
-import PasswordInput from "components/PasswordInput";
-import type { SignupData, SignupFormProps } from "types/auth";
+import Input from "~/components/Input";
+import PasswordInput from "~/components/PasswordInput";
+import type { SignupData, SignupFormProps } from "~/types/auth";
 
-import { Mail, User } from "lucide-react";
+import { Mail, Phone, User } from "lucide-react";
 
 export default function SignupForm({ switchToLogin }: SignupFormProps) {
   const [signupData, setSignupData] = useState<SignupData>({

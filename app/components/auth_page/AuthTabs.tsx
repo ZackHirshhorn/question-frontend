@@ -1,4 +1,4 @@
-import type { AuthTabsProps } from "../../../types/auth";
+import type { AuthTabsProps } from "../../types/auth";
 
 export default function AuthTabs({ activeTab, setActiveTab }: AuthTabsProps) {
   return (

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import AuthTabs from "containers/AuthPage/components/AuthTabs";
-import LoginForm from "containers/AuthPage/components/LoginForm";
-import SignupForm from "containers/AuthPage/components/SignupForm";
+import AuthTabs from "./AuthTabs";
+import LoginForm from "./LoginForm";
+import SignupForm from "./SignupForm";
 
-export default function AuthPage() {
+export default function AuthComponent() {
   const [activeTab, setActiveTab] = useState("login");
 
   return (

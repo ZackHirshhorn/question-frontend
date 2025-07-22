@@ -12,11 +12,13 @@
     "@headlessui/react": "^2.2.4",
     "@react-router/node": "^7.5.3",
     "@react-router/serve": "^7.5.3",
+    "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.10.0",
     "isbot": "^5.1.27",
     "lucide-react": "^0.454.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-redux": "^9.2.0",
     "react-router": "^7.5.3",
     "react-router-dom": "^7.6.3",
     "zustand": "^5.0.5"

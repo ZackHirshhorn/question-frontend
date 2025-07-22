@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axiosClient from "../../api/axios";
+import axiosClient from "../api/axios";
 
 const GetAll = () => {
   const [loading, setLoading] = useState(true);

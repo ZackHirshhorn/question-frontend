@@ -9,7 +9,7 @@ import type {
   SubCategory,
   Topic,
   Question,
-} from "../../types/questionnaire";
+} from "../types/questionnaire";
 import axios from "axios";
 
 export default function QBuilder() {

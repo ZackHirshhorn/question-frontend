@@ -6,7 +6,7 @@ import type {
   SubCategory,
   Topic,
   Question, 
-} from "types/questionnaire";
+} from "~/types/questionnaire";
 import { buildId } from "containers/QuestionnaireBuilder/utils/build-id";
 
 export function useQuestionnaire() {
