@@ -38,16 +38,16 @@ export const login = createAsyncThunk<
   }
 });
 
-export const logout = createAsyncThunk("auth/logout", async () => {
-  await axiosClient.post("/api/auth/logout");
-  clearStoredUserId();            // 🧹 remove
-});
-
 /* --- slice ------------------------------------------------------------- */
 const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state) => {
+      state.userId = null;
+      clearStoredUserId();
+    },
+  },
   extraReducers: (b) => {
     b.addCase(login.pending,  (s) => { s.loading = true;  s.error = null; })
      .addCase(login.fulfilled,(s, a) => {
@@ -58,8 +58,8 @@ const authSlice = createSlice({
        s.loading = false;
        s.error   = a.payload ?? "Unknown error";
      })
-     .addCase(logout.fulfilled,(s) => { s.userId = null; });
   },
 });
 
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

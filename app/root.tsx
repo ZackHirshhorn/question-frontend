@@ -3,11 +3,11 @@ import {
   ScrollRestoration,
   Outlet,
 } from "react-router-dom";
+import { useEffect } from "react";
 
 import { Provider } from "react-redux";
-import { store } from "app/store";
+import { store, useAppSelector } from "app/store";
 import "./app.css";
-import { getStoredUserId } from "utils/localUser"
 import AuthComponent from "./components/auth_page/AuthComponent";
 
 export default function Root() {
@@ -25,7 +25,7 @@ export default function Root() {
 }
 
 function SessionGate() {
-  const userId = getStoredUserId();   // null if not logged in
+  const userId = useAppSelector((state) => state.auth.userId);
 
   return userId ? <Outlet /> : <AuthComponent />;
 }

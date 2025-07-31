@@ -13,26 +13,14 @@ export default function Input({
   className = "",
 }: InputProps) {
   return (
-    <div className={className}>
-      <label htmlFor={id} className="block text-sm font-medium">
-        {label}
-      </label>
-      <div className="relative">
-        {Icon && (
-          <span className="absolute left-3 top-3 text-gray-400">
-            <Icon className="h-5 w-5" />
-          </span>
-        )}
-        <input
+    <input
           id={id}
           type={type}
-          className={`pl-10 pr-3 w-full border border-gray-300 rounded px-3 py-2 ${className}`}
+          className={`pl-10 pr-3 border border-gray-300 rounded px-3 py-2 ${className}`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
         />
-      </div>
-    </div>
   );
 }
