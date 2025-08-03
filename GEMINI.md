@@ -1,2 +1,2 @@
 ## Gemini Added Memories
-- never run npm
+- never do 'npm run dev'
