@@ -1,6 +1,12 @@
 import axiosClient from './axiosClient';
 
-export const createTemplate = (data: any) => {.
+interface TemplateData {
+  // Define the properties for a template
+  name: string;
+  content: Record<string, unknown>;
+}
+
+export const createTemplate = (data: TemplateData) => {
   return axiosClient.post('/template', data);
 };
 
@@ -16,7 +22,7 @@ export const deleteTemplate = (id: string) => {
   return axiosClient.delete(`/template/${id}`);
 };
 
-export const updateTemplate = (id: string, data: any) => {
+export const updateTemplate = (id: string, data: Partial<TemplateData>) => {
   return axiosClient.put(`/template/${id}`, data);
 };
 

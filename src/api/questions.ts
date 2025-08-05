@@ -1,6 +1,12 @@
 import axiosClient from './axiosClient';
 
-export const createQuestionCollection = (data: any) => {
+interface QuestionCollectionData {
+  // Define the properties for a question collection
+  name: string;
+  questions: Record<string, unknown>[];
+}
+
+export const createQuestionCollection = (data: QuestionCollectionData) => {
   return axiosClient.post('/questions', data);
 };
 
@@ -12,7 +18,7 @@ export const getQuestionCollection = (id: string) => {
   return axiosClient.get(`/questions/${id}`);
 };
 
-export const updateQuestionCollection = (id: string, data: any) => {
+export const updateQuestionCollection = (id: string, data: Partial<QuestionCollectionData>) => {
   return axiosClient.put(`/questions/${id}`, data);
 };
 

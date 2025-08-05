@@ -24,3 +24,19 @@ dist-ssr
 *.sw?
 
 .env
+GEMINI.md
+*GEMINI.md
+.env
+.env*
+
+# Environment variables
+.env.*
+.env.local
+
+# Test coverage
+coverage/
+
+# Cypress-specific
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
