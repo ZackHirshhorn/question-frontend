@@ -54,10 +54,10 @@ const Auth: React.FC = () => {
     <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
       <div role="tablist" style={{ display: 'flex', gap: '10px' }}>
         <button role="tab" aria-selected={activeTab === 'login'} onClick={() => setActiveTab('login')} style={{ width: '50%', padding: '10px', cursor: 'pointer', backgroundColor: activeTab === 'login' ? 'lightgray' : '#f1f1f1', color: 'black', border: 'none' }}>
-          Login
+          התחברות
         </button>
         <button role="tab" aria-selected={activeTab === 'register'} onClick={() => setActiveTab('register')} style={{ width: '50%', padding: '10px', cursor: 'pointer', backgroundColor: activeTab === 'register' ? 'lightgray' : '#f1f1f1', color: 'black', border: 'none' }}>
-          Register
+          הרשמה
         </button>
       </div>
 
@@ -65,34 +65,34 @@ const Auth: React.FC = () => {
         {activeTab === 'login' ? (
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="email">Email:</label>
+              <label htmlFor="email">דוא"ל:</label>
               <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
             </div>
             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="password">Password:</label>
+              <label htmlFor="password">סיסמה:</label>
               <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>Login</button>
+            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>התחברות</button>
           </form>
         ) : (
           <form onSubmit={handleRegister}>
             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="name">Name:</label>
+              <label htmlFor="name">שם:</label>
               <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
             </div>
             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="reg-email">Email:</label>
+              <label htmlFor="reg-email">דוא"ל:</label>
               <input id="reg-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
             </div>
             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="reg-password">Password:</label>
+              <label htmlFor="reg-password">סיסמה:</label>
               <input id="reg-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
             </div>
             <div style={{ marginBottom: '10px' }}>
-              <label htmlFor="confirm-password">Confirm Password:</label>
+              <label htmlFor="confirm-password">אישור סיסמה:</label>
               <input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
             </div>
-            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>Register</button>
+            <button type="submit" style={{ width: '100%', padding: '10px', backgroundColor: '#28a745', color: 'white', border: 'none', cursor: 'pointer' }}>הרשמה</button>
           </form>
         )}
         {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
