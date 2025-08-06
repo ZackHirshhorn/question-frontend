@@ -1,45 +1,83 @@
 import React, { useEffect, useState } from 'react';
-import { getQuestionnaires } from '../api/questionnaire';
+import { getQuestionnaires, getQuestionnaire } from '../api/questionnaire';
+import { canCreateQuestionnaires } from '../api/template';
 import GenericList from './GenericList';
 import GenericListItem from './GenericListItem';
 import AddItemListItem from './AddItemListItem';
+import CreateQuestionnaire from './CreateQuestionnaire';
+import './CreateQuestionnaire.css';
 
 // This interface should match the structure of your questionnaire data
 interface Questionnaire {
   id: string;
-  userName: string; // Assuming 'userName' is the title you want to display
+  template: {
+    name: string;
+  };
 }
 
 // A special object for the "Add New" item.
-// We use a type union to allow our list to contain either a Questionnaire or this special item.
 const ADD_NEW_ID = 'add-new-questionnaire';
 const addNewPlaceholder: Questionnaire = {
   id: ADD_NEW_ID,
-  userName: 'שאלון חדש',
+  template: {
+    name: 'שאלון חדש',
+  },
 };
 
 const Questionnaires: React.FC = () => {
   const [items, setItems] = useState<Questionnaire[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPopupOpen, setPopupOpen] = useState(false);
+  const [canCreate, setCanCreate] = useState(false);
+
+  const checkPermissions = async () => {
+    try {
+      await canCreateQuestionnaires();
+      setCanCreate(true);
+    } catch (error) {
+      setCanCreate(false);
+    }
+  };
+
+  const fetchQuestionnaires = async () => {
+    setLoading(true);
+    try {
+      const response = await getQuestionnaires();
+      const questionnaireInfo: { id: string }[] = response.data;
+      const detailedQuestionnaires = await Promise.all(
+        questionnaireInfo.map(async (info: { id: string }) => {
+          // at the time of adding this code, this is the only
+          // way to get the template name, since the questionnaire
+          // endpoint returns just questionnaire ids.
+          const details = await getQuestionnaire(info.id);
+          return details.data;
+        })
+      );
+      setItems(detailedQuestionnaires);
+    } catch (err) {
+      console.error('Failed to fetch questionnaires:', err);
+      setError('Failed to fetch questionnaires. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    getQuestionnaires()
-      .then(response => {
-        // Always add the placeholder to the end of the fetched list
-        setItems([...response.data, addNewPlaceholder]);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to fetch questionnaires:', err);
-        setError('Failed to fetch questionnaires. Please try again later.');
-        setLoading(false);
-      });
+    checkPermissions();
+    fetchQuestionnaires();
   }, []);
 
   const handleAddNew = () => {
-    // Logic to create a new questionnaire will go here.
-    console.log('Add new questionnaire clicked!');
+    setPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setPopupOpen(false);
+  };
+
+  const handleQuestionnaireCreated = () => {
+    fetchQuestionnaires();
   };
 
   if (loading) {
@@ -54,17 +92,27 @@ const Questionnaires: React.FC = () => {
     return <div style={{ color: 'red' }}>{error}</div>;
   }
 
+  const displayItems = canCreate ? [...items, addNewPlaceholder] : items;
+
   return (
-    <GenericList
-      items={items}
-      keyExtractor={(item) => item.id}
-      renderItem={(item) => {
-        if (item.id === ADD_NEW_ID) {
-          return <AddItemListItem text={item.userName} onClick={handleAddNew} />;
-        }
-        return <GenericListItem content={item.userName} />;
-      }}
-    />
+    <>
+      <GenericList
+        items={displayItems}
+        keyExtractor={(item) => item.id}
+        renderItem={(item) => {
+          if (item.id === ADD_NEW_ID) {
+            return <AddItemListItem text={item.template.name} onClick={handleAddNew} />;
+          }
+          return <GenericListItem content={item.template.name} />;
+        }}
+      />
+      {isPopupOpen && (
+        <CreateQuestionnaire
+          onClose={handleClosePopup}
+          onQuestionnaireCreated={handleQuestionnaireCreated}
+        />
+      )}
+    </>
   );
 };
 

@@ -11,3 +11,7 @@ export const createQuestionnaire = (data: CreateQuestionnaireData) => {
 export const getQuestionnaires = () => {
   return axiosClient.get(`/questionnaire/user`);
 };
+
+export const getQuestionnaire = (id: string) => {
+  return axiosClient.get(`/questionnaire/${id}`);
+};

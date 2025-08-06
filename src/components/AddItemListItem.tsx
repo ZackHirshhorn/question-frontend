@@ -27,8 +27,7 @@ const AddItemListItem: React.FC<AddItemListItemProps> = ({ onClick, text }) => {
 
   return (
     <div style={itemStyle} onClick={onClick}>
-      <span style={plusIconStyle}>+</span>
-      {text}
+      <span style={plusIconStyle}>+</span>&nbsp;{text}
     </div>
   );
 };

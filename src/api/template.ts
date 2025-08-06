@@ -10,8 +10,16 @@ export const createTemplate = (data: TemplateData) => {
   return axiosClient.post('/template', data);
 };
 
-export const getTemplates = () => {
-  return axiosClient.get('/template');
+// export const getTemplates = () => {
+//   return axiosClient.get('/template');
+// };
+
+export const getTemplates = (page = 1, pageSize = 50) => {
+  return axiosClient.get(`/template/search?page=${page}&pageSize=${pageSize}`);
+};
+
+export const canCreateQuestionnaires = () => {
+  return axiosClient.head(`/template/search?page=1&pageSize=1`);
 };
 
 export const getTemplate = (id: string) => {
