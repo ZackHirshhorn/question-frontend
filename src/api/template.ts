@@ -26,6 +26,6 @@ export const updateTemplate = (id: string, data: Partial<TemplateData>) => {
   return axiosClient.put(`/template/${id}`, data);
 };
 
-export const searchTemplates = (query: string) => {
-  return axiosClient.get(`/template/search?query=${query}`);
+export const searchTemplates = (name: string) => {
+  return axiosClient.get(`/template/search?name=${name}`);
 };

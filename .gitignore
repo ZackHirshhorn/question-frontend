@@ -23,15 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
 GEMINI.md
 *GEMINI.md
-.env
-.env*
 
 # Environment variables
-.env.*
-.env.local
+.env*
 
 # Test coverage
 coverage/
@@ -40,3 +36,6 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 cypress/downloads/
+
+# Swagger files
+Swagger UI*

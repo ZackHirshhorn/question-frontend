@@ -1,13 +1,10 @@
 import axiosClient from './axiosClient';
 
-interface QuestionnaireData {
-  // Define the properties for a new questionnaire
-  title: string;
-  description?: string;
-  userId: string;
+interface CreateQuestionnaireData {
+  templateId: string;
 }
 
-export const createQuestionnaire = (data: QuestionnaireData) => {
+export const createQuestionnaire = (data: CreateQuestionnaireData) => {
   return axiosClient.post('/questionnaire', data);
 };
 
