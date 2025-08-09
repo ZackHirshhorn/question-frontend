@@ -37,3 +37,7 @@ export const updateTemplate = (id: string, data: Partial<TemplateData>) => {
 export const searchTemplates = (name: string) => {
   return axiosClient.get(`/template/search?name=${name}`);
 };
+
+export const getUserTemplates = () => {
+  return axiosClient.get('/template/user');
+};

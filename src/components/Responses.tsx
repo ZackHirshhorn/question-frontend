@@ -24,7 +24,7 @@ const addNewPlaceholder: Questionnaire = {
   },
 };
 
-const Questionnaires: React.FC = () => {
+const Responses: React.FC = () => {
   const [items, setItems] = useState<Questionnaire[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +103,14 @@ const Questionnaires: React.FC = () => {
           if (item.id === ADD_NEW_ID) {
             return <AddItemListItem text={item.template.name} onClick={handleAddNew} />;
           }
-          return <GenericListItem content={item.template.name} />;
+          return (
+    <GenericListItem
+        content={item.template.name}
+        onEditClick={() => console.log('Edit clicked for', item.template.name)}
+        onDeleteClick={() => console.log('Delete clicked for', item.template.name)}
+        onPlusClick={() => console.log('Plus clicked for', item.template.name)}
+    />
+);
         }}
       />
       {isPopupOpen && (
@@ -116,4 +123,4 @@ const Questionnaires: React.FC = () => {
   );
 };
 
-export default Questionnaires;
+export default Responses;
