@@ -69,7 +69,20 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
 
   return (
     <GenericListItem
-      content={content}
+      content={
+        <span
+          style={{
+            fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
+            fontWeight: 500,
+            fontSize: '20px',
+            lineHeight: '100%',
+            letterSpacing: '0',
+            textAlign: 'right',
+          }}
+        >
+          {content}
+        </span>
+      }
       onClick={onClick}
       actions={actions}
       leftIcon={<TriangleIcon isRotated={isExpanded} isVisible={isExpanded} />}
@@ -80,5 +93,4 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
 };
 
 export default CategoryListItem;
-
 

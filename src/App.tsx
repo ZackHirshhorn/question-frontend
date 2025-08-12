@@ -7,6 +7,7 @@ import Templates from './components/Templates';
 import Responses from './components/Responses';
 import TemplateView from './components/TemplateView';
 import MainLayout from './components/MainLayout';
+import Questions from './components/Questions';
 import { logout as logoutAction } from './store/userSlice';
 import { logout as logoutApi } from './api/auth';
 import type { RootState } from './store';
@@ -51,9 +52,10 @@ function App() {
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Templates onTemplateClick={handleSelectTemplate} />} />
                 <Route path="/templates" element={<Templates onTemplateClick={handleSelectTemplate} />} />
+                <Route path="/templates/:templateId" element={<TemplateView onBack={handleBack} />} />
                 <Route path="/responses" element={<Responses />} />
+                <Route path="/questions" element={<Questions />} />
               </Route>
-              <Route path="/templates/:templateId" element={<TemplateView onBack={handleBack} />} />
             </Routes>
           </div>
         </>

@@ -10,7 +10,7 @@ interface ConfirmDeletePopupProps {
 
 const ConfirmDeletePopup: React.FC<ConfirmDeletePopupProps> = ({ message, onClose, onConfirm }) => {
   return (
-    <div className="popup-overlay">
+    <div className="popup-overlay popup-overlay--center">
       <div className="popup-content">
         <h2 style={{ marginBottom: '20px' }}>{message}</h2>
         <div className="form-actions">

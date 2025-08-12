@@ -1,20 +1,21 @@
 // src/components/SubCategoryList.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import GenericList from './GenericList';
 import SubCategoryListItem from './SubCategoryListItem';
+import TopicList from './TopicList';
+import type { UISubCategory } from '../types/template';
 
-interface SubCategory {
-  name: string;
-  questions: any[];
-  topics: any[];
-}
+type SubCategory = UISubCategory;
 
 interface SubCategoryListProps {
   subCategories: SubCategory[];
   onRenameClick: (subCategoryName: string) => void;
-  onDeleteClick: (subCategoryName: string) => void;
+  onDeleteClick: (subCategory: SubCategory) => void;
   onPlusQuestionClick: (subCategoryName: string) => void;
   onNewClick: (subCategoryName: string) => void;
+  onTopicRenameClick?: (topicName: string, subCategoryName: string) => void;
+  onTopicDeleteClick?: (topicName: string, subCategoryName: string) => void;
+  onTopicPlusQuestionClick?: (topicName: string, subCategoryName: string) => void;
 }
 
 const SubCategoryList: React.FC<SubCategoryListProps> = ({
@@ -23,7 +24,15 @@ const SubCategoryList: React.FC<SubCategoryListProps> = ({
   onDeleteClick,
   onPlusQuestionClick,
   onNewClick,
+  onTopicRenameClick,
+  onTopicDeleteClick,
+  onTopicPlusQuestionClick,
 }) => {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const toggle = (id: string) => {
+    setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+  };
   if (!subCategories || subCategories.length === 0) {
     return null;
   }
@@ -32,16 +41,27 @@ const SubCategoryList: React.FC<SubCategoryListProps> = ({
     <div style={{ marginLeft: '40px', paddingLeft: '10px', marginTop: '10px' }}>
       <GenericList
         items={subCategories}
-        keyExtractor={(item) => item.name}
+        keyExtractor={(item) => item.id}
         renderItem={(item) => (
-          <SubCategoryListItem
-            content={item.name}
-            onClick={() => console.log('SubCategory clicked:', item.name)}
-            onRenameClick={() => onRenameClick(item.name)}
-            onDeleteClick={() => onDeleteClick(item.name)}
-            onPlusQuestionClick={() => onPlusQuestionClick(item.name)}
-            onNewClick={() => onNewClick(item.name)}
-          />
+          <div>
+            <SubCategoryListItem
+              content={item.name}
+              isExpanded={!!expanded[item.id]}
+              onClick={() => toggle(item.id)}
+              onRenameClick={() => onRenameClick(item.name)}
+              onDeleteClick={() => { setExpanded(prev => ({ ...prev, [item.id]: false })); onDeleteClick(item); }}
+              onPlusQuestionClick={() => onPlusQuestionClick(item.name)}
+              onNewClick={() => onNewClick(item.name)}
+            />
+            {!!expanded[item.id] && (
+              <TopicList
+                topics={item.topics}
+                onRenameClick={(topicName) => onTopicRenameClick && onTopicRenameClick(topicName, item.name)}
+                onDeleteClick={(topicName) => onTopicDeleteClick && onTopicDeleteClick(topicName, item.name)}
+                onPlusQuestionClick={(topicName) => onTopicPlusQuestionClick && onTopicPlusQuestionClick(topicName, item.name)}
+              />
+            )}
+          </div>
         )}
       />
     </div>

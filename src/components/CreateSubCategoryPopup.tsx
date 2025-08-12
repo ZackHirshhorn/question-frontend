@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import AnimatedErrorMessage from './AnimatedErrorMessage';
+import './CreateTemplate.css';
+import TextInput from './TextInput';
 
 interface CreateSubCategoryPopupProps {
   categoryName: string;
   onClose: () => void;
   onCreate: (names: string[]) => void;
+  existingSubCategoryNames: string[];
 }
 
 import './Button.css';
@@ -12,17 +16,24 @@ const CreateSubCategoryPopup: React.FC<CreateSubCategoryPopupProps> = ({
   onClose,
   onCreate,
   categoryName,
+  existingSubCategoryNames,
 }) => {
-  const [inputs, setInputs] = useState(['']);
+  const [inputs, setInputs] = useState([{ name: '', error: '' }]);
 
   const handleInputChange = (index: number, value: string) => {
     const newInputs = [...inputs];
-    newInputs[index] = value;
+    newInputs[index].name = value;
+
+    const trimmed = value.trim();
+    const isDuplicateExisting = existingSubCategoryNames.includes(trimmed);
+    const isDuplicateLocal = newInputs.some((inp, i) => i !== index && inp.name.trim() === trimmed);
+    newInputs[index].error = trimmed && (isDuplicateExisting || isDuplicateLocal) ? 'תת-קטגוריה עם שם זה כבר קיימת.' : '';
+
     setInputs(newInputs);
   };
 
   const addInput = () => {
-    setInputs([...inputs, '']);
+    setInputs([...inputs, { name: '', error: '' }]);
   };
 
   const removeInput = (index: number) => {
@@ -32,7 +43,10 @@ const CreateSubCategoryPopup: React.FC<CreateSubCategoryPopupProps> = ({
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    onCreate(inputs);
+    const names = inputs.map(i => i.name.trim()).filter(Boolean);
+    if (names.length) {
+      onCreate(names);
+    }
   };
 
   return (
@@ -43,17 +57,21 @@ const CreateSubCategoryPopup: React.FC<CreateSubCategoryPopupProps> = ({
           <div className="form-group">
             <label>שם תת הקטגוריה</label>
             {inputs.map((input, index) => (
-              <div key={index} style={{ display: 'flex', marginBottom: '10px' }}>
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => handleInputChange(index, e.target.value)}
-                  required
-                  style={{ flexGrow: 1, marginRight: '10px' }}
-                />
-                <button type="button" className="button-secondary" onClick={() => removeInput(index)}>
-                  הסר
-                </button>
+              <div key={index} style={{ marginBottom: '10px' }}>
+                <div style={{ display: 'flex' }}>
+                  <div style={{ flexGrow: 1, marginRight: '10px' }}>
+                    <TextInput
+                      type="text"
+                      value={input.name}
+                      onChange={(e) => handleInputChange(index, e.target.value)}
+                      required
+                    />
+                  </div>
+                  <button type="button" className="button-secondary" onClick={() => removeInput(index)}>
+                    הסר
+                  </button>
+                </div>
+                <AnimatedErrorMessage message={input.error} />
               </div>
             ))}
           </div>
@@ -64,7 +82,7 @@ const CreateSubCategoryPopup: React.FC<CreateSubCategoryPopupProps> = ({
             <button type="button" className="button-secondary" onClick={onClose}>
               ביטול
             </button>
-            <button type="submit" className="button-primary">
+            <button type="submit" className="button-primary" disabled={inputs.some(i => i.error) || inputs.some(i => !i.name.trim())}>
               שמור
             </button>
           </div>

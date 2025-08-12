@@ -8,7 +8,13 @@ describe('CreateTemplate', () => {
     const handleClose = vi.fn();
     const handleTemplateCreated = vi.fn();
 
-    render(<CreateTemplate onClose={handleClose} onTemplateCreated={handleTemplateCreated} />);
+    render(
+      <CreateTemplate
+        onClose={handleClose}
+        onTemplateCreated={handleTemplateCreated}
+        existingTemplateNames={[]}
+      />
+    );
 
     const textboxes = screen.getAllByRole('textbox');
     const templateNameInput = textboxes[0];

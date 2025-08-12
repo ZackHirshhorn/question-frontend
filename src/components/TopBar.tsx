@@ -18,26 +18,59 @@ const TopBar: React.FC = () => {
   };
 
   const getLinkStyle = (path: string): React.CSSProperties => {
-    const isActive = location.pathname.startsWith(path);
-    return {
-      textDecoration: isActive ? 'underline' : 'none',
-      color: isActive ? '#007bff' : 'black',
-      fontSize: '18px',
+    let isActive = location.pathname.startsWith(path);
+    // Treat root path as Templates active
+    if (path === '/templates') {
+      isActive = isActive || location.pathname === '/';
+    }
+    const base: React.CSSProperties = {
       cursor: 'pointer',
       padding: '10px',
+    };
+    if (isActive) {
+      return {
+        ...base,
+        textDecoration: 'underline',
+        color: '#0957D0',
+        fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
+        fontWeight: 700,
+        fontSize: '20px',
+        lineHeight: '100%',
+        letterSpacing: '0',
+        textAlign: 'right',
+      };
+    }
+    // Non-active tab typography from Figma
+    return {
+      ...base,
+      textDecoration: 'none',
+      color: 'black',
+      fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
+      fontWeight: 700,
+      fontSize: '20px',
+      lineHeight: '100%',
+      letterSpacing: '0',
+      textAlign: 'right',
     };
   };
 
   return (
     <div style={topBarStyle}>
-      {/* Right Half (due to RTL) */}
+      {/* Templates */}
       <div style={tabStyle}>
         <Link to="/templates" style={getLinkStyle('/templates')}>
           שאלונים
         </Link>
       </div>
 
-      {/* Left Half */}
+      {/* Questions (middle tab) */}
+      <div style={tabStyle}>
+        <Link to="/questions" style={getLinkStyle('/questions')}>
+          שאלות
+        </Link>
+      </div>
+
+      {/* Responses */}
       <div style={tabStyle}>
         <Link to="/responses" style={getLinkStyle('/responses')}>
           תגובות

@@ -15,3 +15,4 @@ export const getQuestionnaires = () => {
 export const getQuestionnaire = (id: string) => {
   return axiosClient.get(`/questionnaire/${id}`);
 };
+

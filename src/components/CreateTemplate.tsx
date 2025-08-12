@@ -89,10 +89,6 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onClose, onTemplateCrea
       <div className="popup-content">
         <h2>יצירת שאלון חדש</h2>
         <form onSubmit={handleSubmit}>
-          import TextInput from './TextInput';
-
-// ... (inside the component)
-
           <div className="form-group">
             <label htmlFor="name">שם השאלון</label>
             <TextInput
@@ -143,4 +139,3 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onClose, onTemplateCrea
 };
 
 export default CreateTemplate;
-

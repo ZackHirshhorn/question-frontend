@@ -9,7 +9,16 @@
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* allow scrolling to reveal top */
+    overflow-y: auto; /* allow scrolling when content is tall */
+    padding: 40px 0; /* space so top/bottom can be revealed */
+    box-sizing: border-box;
+  }
+
+  /* Centered variant for lightweight confirm dialogs */
+  .popup-overlay.popup-overlay--center {
+    align-items: center; /* vertical center */
+    padding: 0; /* remove vertical padding so true center */
   }
   
   .popup-content {
@@ -19,9 +28,451 @@
     width: 400px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
+
+  /* Square variant for CreateQuestionsCol */
+  .popup-content.popup-content--square {
+    border-radius: 0;
+    width: 100%;
+    max-width: 800px; /* Match .main-container max width */
+    padding: 36px 96px; /* vertical horizontal */
+    margin: 0; /* overlay padding handles top/bottom spacing */
+  }
+
+  /* Input style overrides for CreateQuestionsCol popup */
+  .popup-content.popup-content--square .input-wrapper {
+    border: 1px solid #EDEDEF;
+    border-radius: 4px;
+  }
+
+  /* Focus border color for inputs inside the square popup */
+  .popup-content.popup-content--square .input-wrapper:focus-within {
+    border-color: #7686E0;
+  }
+
+  /* Remove focus background for inputs in the square popup */
+  .popup-content.popup-content--square .input-wrapper input:focus {
+    background-color: transparent;
+  }
+
+  .popup-content.popup-content--square .input-wrapper input::placeholder {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    color: #909090;
+  }
+
+  .popup-content.popup-content--square .input-wrapper input {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+  }
   
   .form-group {
     margin-bottom: 15px;
+  }
+
+  .popup-label {
+    display: block;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 700; /* Bold */
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    margin: 0 0 8px 0;
+  }
+
+  .popup-section-title {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 700; /* Bold */
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    margin: 24px 0 12px 0;
+  }
+
+  .popup-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* start of the inline axis */
+    direction: rtl; /* so start is the right side */
+    gap: 8px;
+    margin: 24px 0 12px 0; /* move spacing to the container */
+  }
+
+  /* Reset margins so vertical centering aligns with the icon */
+  .popup-section-header .popup-section-title {
+    margin: 0;
+  }
+
+  .popup-empty-questions {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    background-color: #F6F6F9;
+    border: 1px solid #EDEDEF; /* 1px border */
+    border-radius: 4px;
+    padding: 12px 16px;
+  }
+
+  .popup-actions-start {
+    display: flex;
+    justify-content: flex-start; /* start of RTL inline axis */
+    direction: rtl;
+    margin-top: 12px;
+  }
+
+  .button-add-question {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    /* Robust centering for any content (text + icons) */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #E6EAFF;
+    border: 1px solid #0957D0;
+    border-radius: 4px;
+    width: 302px;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+
+  .popup-divider {
+    width: 100%;
+    height: 1px;
+    background-color: #E6EAFF;
+    margin-top: 16px;
+    margin-bottom: 40px; /* gap to bottom buttons */
+  }
+
+  /* Saved questions list (read-only view) */
+  .popup-questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    width: 302px; /* match .button-add-question width */
+  }
+
+  .popup-question-item {
+    border: 1px solid #EDEDEF;
+    border-radius: 4px;
+    padding: 15px 18px;
+    background-color: #FFFFFF;
+    width: 100%;
+  }
+
+  .popup-question-item-row {
+    display: flex;
+    align-items: flex-start; /* align content to top, not center */
+    justify-content: space-between;
+    direction: rtl;
+  }
+
+  /* Stack name above type on the right */
+  .popup-question-textblock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* in RTL container, this is visually right aligned block content */
+    gap: 8px; /* slightly more space between name and type */
+  }
+
+  .popup-question-text {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 600; /* Semi Bold */
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+  }
+
+  .popup-question-meta {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    color: #666666;
+  }
+
+  .popup-question-actions {
+    display: inline-flex;
+    gap: 8px;
+    align-items: flex-start; /* keep icons at top-left */
+  }
+
+  .icon-button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .popup-question-form {
+    width: 100%;
+    box-sizing: border-box; /* include border in width to avoid overflow */
+    background-color: transparent; /* no background */
+    border: 1px solid #EDEDEF;
+    border-radius: 4px;
+    padding: 14px 20px; /* vertical horizontal */
+    margin-top: 16px;
+    margin-bottom: 40px; /* same spacing as divider to buttons */
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    direction: rtl;
+  }
+
+  .question-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 12px;
+    row-gap: 12px;
+    direction: rtl;
+  }
+
+  /* Normalize cell content to avoid unexpected extra vertical space */
+  .question-form-grid .question-form-cell {
+    display: flex;
+    align-items: center;
+  }
+
+  .question-form-grid .question-form-cell > * {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  /* Vertical stack inside a cell (e.g., select above a subtitle) */
+  .question-form-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0; /* no gap between select and the following title */
+  }
+
+  /* Stack for options under the title */
+  .question-options-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 302px; /* match selector visual width to align end borders */
+  }
+
+  .question-option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: rtl; /* ensure start is visually right */
+  }
+
+  /* Make option inputs take the remaining width next to the icon */
+  .question-option-row .input-wrapper {
+    flex: 1 1 auto;
+    max-width: none; /* allow flex to control width */
+  }
+
+  .question-option-radio {
+    width: 16px;
+    min-width: 16px; /* prevent flex grow */
+    height: 16px;
+    margin: 0;
+    flex: 0 0 auto; /* take minimal width */
+  }
+
+  .input-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .question-options-title {
+    font-family: Inter;
+    font-weight: 600; /* Semi Bold */
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+  }
+
+  /* Place the warning under the select (second column) */
+  .question-form-warning {
+    grid-column: 2;
+  }
+
+  /* Utility to place a cell in the second (end) column */
+  .question-form-right {
+    grid-column: 2;
+    display: flex;
+    justify-content: flex-start; /* align content to inline-start (right in RTL) */
+  }
+
+  /* Spacer row to provide equal vertical gap between row 2 and 3 across both columns */
+  .question-form-spacer {
+    grid-column: 1 / -1;
+    height: 40px; /* roughly the height of a control row */
+  }
+
+  /* Form controls styling inside question form */
+  .popup-content.popup-content--square .question-form-grid select {
+    width: 100%;
+    max-width: 302px;
+    box-sizing: border-box;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    border: 1px solid #EDEDEF;
+    border-radius: 4px;
+    padding: 10px 8px;
+    height: 40px; /* match input wrapper height */
+    background-color: #FFFFFF;
+    direction: rtl;
+  }
+
+  .popup-content.popup-content--square .question-form-grid select:focus {
+    border-color: #7686E0;
+    outline: none;
+    background-color: transparent;
+  }
+
+  /* Ensure text input wrapper matches select dimensions */
+  .popup-content.popup-content--square .question-form-grid .input-wrapper {
+    max-width: 302px;
+    height: 40px; /* match select height */
+    padding: 0 8px; /* restore horizontal padding only */
+  }
+
+  /* Remove margins from the inner input within the grid wrapper */
+  .popup-content.popup-content--square .question-form-grid .input-wrapper input {
+    margin: 0 10px; /* restore horizontal margin only */
+  }
+
+  /* Lighter disabled color for the in-form save button */
+  .popup-content.popup-content--square .question-form-actions .button-save:disabled {
+    background-color: #E0E0E0;
+  }
+
+  .question-form-label {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 600; /* Semi Bold */
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+  }
+
+  .toggle-required {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    direction: rtl;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+  }
+
+  /* Visually hide the native checkbox but keep it accessible */
+  .toggle-required input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  /* Toggle UI based on Toggle.svg (on state) */
+  .toggle-required .toggle-ui {
+    width: 60px;
+    height: 34px;
+    border-radius: 999px;
+    background-color: #EDEDEF; /* off state */
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+  }
+
+  .toggle-required .toggle-ui::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #FFFFFF;
+    left: 4px; /* off state knob on left (RTL-friendly visual) */
+    box-shadow: 0 3px 0.5px rgba(0,0,0,0.06), 0 3px 8px rgba(0,0,0,0.15);
+  }
+
+  /* On state styles */
+  .toggle-required input[type="checkbox"]:checked + .toggle-ui {
+    background-color: #C5C3FE;
+  }
+
+  .toggle-required input[type="checkbox"]:checked + .toggle-ui::after {
+    left: calc(100% - 28px - 4px); /* move knob to right */
+  }
+
+  .question-form-actions {
+    display: flex;
+    justify-content: space-between; /* spread within column area */
+    align-items: center;
+    direction: rtl; /* save at start (right), cancel at end (left) */
+    width: 100%;
+    max-width: 302px; /* align end with select above */
+    margin-left: auto; /* align container to the right edge of the grid cell */
+  }
+
+  .popup-content.popup-content--square .question-form-actions .button-save {
+    background-color: #404040; /* dark save */
+    color: #FFFFFF;
+    border-radius: 4px;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+  }
+
+  .popup-content.popup-content--square .question-form-actions .button-cancel {
+    border: 1px solid #B3B3B3;
+    color: #000000;
+    border-radius: 4px;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
   }
   
   .error-message {
@@ -33,6 +484,75 @@
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+  }
+
+  /* In the square popup, bottom actions should align to start (right in RTL) */
+  .popup-content.popup-content--square .form-actions {
+    justify-content: space-between; /* create at start (right), cancel at end (left) */
+    direction: rtl;
+    width: 100%;
+  }
+
+  /* Push the cancel button to the far end and add black border */
+  .popup-content.popup-content--square .form-actions .button-cancel {
+    margin-inline-start: 0; /* no auto-push; container spreads items */
+    border: 1px solid #B3B3B3;
+    color: #000000;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 700; /* Bold */
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    border-radius: 10px; /* ensure 10px radius */
+    margin: 0; /* remove horizontal margins */
+  }
+
+  /* Create button typography in this popup */
+  .popup-content.popup-content--square .form-actions .button-primary {
+    color: #FFFFFF;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 700; /* Bold */
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    border-radius: 10px; /* ensure 10px radius */
+    margin: 0; /* remove horizontal margins */
+  }
+
+  /* Popup title (h2) typography (Figma) */
+  .popup-content h2 {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 600; /* Semi Bold */
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  /* Subtitle under popup title */
+  .popup-subtitle {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    margin: 0 0 20px 0;
+  }
+
+  .popup-warning {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    color: #B00020;
+    margin-top: 6px;
   }
 
   .category-row {

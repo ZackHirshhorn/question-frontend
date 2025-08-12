@@ -5,6 +5,7 @@ import GenericList from './GenericList';
 import './CreateTemplate.css';
 import Loading from './Loading';
 import TemplateListItem from './TemplateListItem';
+import { useSorter } from './Sorter';
 
 interface Template {
   id: string;
@@ -16,6 +17,7 @@ interface TemplatesProps {
 }
 
 import './Button.css';
+import PlusWhiteIcon from '../assets/icons/PlusWhiteIcon';
 
 const Templates: React.FC<TemplatesProps> = ({ onTemplateClick }) => {
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -67,6 +69,15 @@ const Templates: React.FC<TemplatesProps> = ({ onTemplateClick }) => {
     fetchTemplates();
   };
 
+  const { sortedItems, Controls } = useSorter(
+    templates,
+    {
+      'לפי האלפבית': (a, b) => a.name.localeCompare(b.name),
+      'לפי תאריך': () => 0,
+    },
+    'לפי האלפבית',
+  );
+
   if (loading) {
     return <Loading />;
   }
@@ -77,23 +88,46 @@ const Templates: React.FC<TemplatesProps> = ({ onTemplateClick }) => {
 
   return (
     <>
-      <div style={{ marginBottom: '1rem' }}>
-        <button className="button-primary" onClick={handleAddNew}>
-          + שאלון חדש
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <button
+          className="button-primary"
+          onClick={handleAddNew}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            borderRadius: '4px',
+            border: '1px solid #0957D0',
+            fontSize: '16px',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
+              fontWeight: 700,
+              fontSize: '20px',
+              lineHeight: '100%',
+              letterSpacing: '0',
+              textAlign: 'right',
+            }}
+          >
+            שאלון חדש
+          </span>
+          <PlusWhiteIcon />
         </button>
+        <Controls />
       </div>
       <GenericList
-        items={templates}
+        items={sortedItems}
         keyExtractor={(item) => item.id}
-        renderItem={(item) => {
-          return (
-            <TemplateListItem
-              content={item.name}
-              onClick={() => onTemplateClick(item.id)}
-              onDeleteClick={() => handleDelete(item.id)}
-            />
-          );
-        }}
+        renderItem={(item) => (
+          <TemplateListItem
+            content={item.name}
+            onClick={() => onTemplateClick(item.id)}
+            onDeleteClick={() => handleDelete(item.id)}
+          />
+        )}
       />
       {isPopupOpen && (
         <CreateTemplate

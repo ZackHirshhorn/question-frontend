@@ -1,14 +1,20 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import axios from 'axios';
 import { login } from './auth';
+import axiosClient from './axiosClient';
 
 describe('Auth API Integration', () => {
-  it.skip('should return a 401 error when providing invalid credentials', async () => {
-    // This is an integration test. It requires the local server to be running.
+  it('should return a 401 error when providing invalid credentials', async () => {
     const invalidCredentials = {
       email: 'nonexistent-user@example.com',
       password: 'wrong-password',
     };
+
+    // Mock axiosClient.post to reject with a 401-like AxiosError
+    vi.spyOn(axiosClient, 'post').mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 401, data: { message: 'Unauthorized' } },
+    } as any);
 
     try {
       await login(invalidCredentials);

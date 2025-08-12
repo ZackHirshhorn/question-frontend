@@ -1,13 +1,16 @@
 /* src/components/Button.css */
 
 .button-primary {
-  background-color: #2b49cd;
+  background-color: #0957D0;
   border: none;
   color: white;
   padding: 10px 20px;
-  text-align: center;
+  /* Robust centering for text and optional icons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
-  display: inline-block;
+  /* replaced by inline-flex above */
   font-size: 14px;
   margin: 4px 2px;
   cursor: pointer;
@@ -16,7 +19,7 @@
 }
 
 .button-primary:hover, .button-primary:focus {
-  background-color: #3c59d1;
+  background-color: #0957D0;
   outline: none;
 }
 
@@ -30,9 +33,12 @@
   border: none;
   color: white;
   padding: 10px 20px;
-  text-align: center;
+  /* Robust centering for text and optional icons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
-  display: inline-block;
+  /* replaced by inline-flex above */
   font-size: 14px;
   margin: 4px 2px;
   cursor: pointer;
@@ -50,9 +56,12 @@
   border: 1px solid transparent;
   color: #2b49cd;
   padding: 10px 20px;
-  text-align: center;
+  /* Robust centering for text and optional icons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
-  display: inline-block;
+  /* replaced by inline-flex above */
   font-size: 14px;
   margin: 4px 2px;
   cursor: pointer;
@@ -77,6 +86,9 @@
   background-color: #f1f1f1;
   color: black;
   border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .button-tab.active {

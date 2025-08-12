@@ -6,10 +6,12 @@ import TrashIcon from '../assets/icons/TrashIcon';
 import PlusWithQuestionIcon from '../assets/icons/PlusWithQuestionIcon';
 import NewIcon from '../assets/icons/NewIcon';
 import '../assets/icons/Icon.css';
+import TriangleIcon from '../assets/icons/TriangleIcon';
 import Tooltip from './Tooltip';
 
 interface SubCategoryListItemProps {
   content: string;
+  isExpanded?: boolean;
   onClick: () => void;
   onRenameClick: () => void;
   onDeleteClick: () => void;
@@ -34,6 +36,7 @@ const IconWrapper = ({ tooltipText, onClick, children }) => {
 
 const SubCategoryListItem: React.FC<SubCategoryListItemProps> = ({
   content,
+  isExpanded = false,
   onClick,
   onRenameClick,
   onDeleteClick,
@@ -44,6 +47,8 @@ const SubCategoryListItem: React.FC<SubCategoryListItemProps> = ({
     display: 'flex',
     gap: '10px',
     alignItems: 'center',
+    transition: 'margin-left 0.3s ease-in-out',
+    marginLeft: isExpanded ? '24px' : '0px',
   };
 
   const actions = (
@@ -65,9 +70,23 @@ const SubCategoryListItem: React.FC<SubCategoryListItemProps> = ({
 
   return (
     <GenericListItem
-      content={content}
+      content={
+        <span
+          style={{
+            fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
+            fontWeight: 500,
+            fontSize: '20px',
+            lineHeight: '100%',
+            letterSpacing: '0',
+            textAlign: 'right',
+          }}
+        >
+          {content}
+        </span>
+      }
       onClick={onClick}
       actions={actions}
+      leftIcon={<TriangleIcon isRotated={isExpanded} isVisible={isExpanded} />}
       backgroundColor="#dffeee"
       hoverBackgroundColor="#b8f4d4"
     />

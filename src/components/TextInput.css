@@ -8,7 +8,6 @@
 }
 
 .input-wrapper input {
-  width: 100%;
   padding: 8px 0;
   border: none;
   border-radius: 0;
@@ -17,6 +16,12 @@
   outline: none;
   flex-grow: 1;
   margin: 0 10px;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: right;
 }
 
 .input-wrapper input:focus {
