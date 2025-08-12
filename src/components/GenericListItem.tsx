@@ -5,11 +5,24 @@ interface GenericListItemProps {
   content: React.ReactNode;
   /** Optional actions to display on hover. */
   actions?: React.ReactNode;
+  /** Optional icon to display on the left, independent of hover. */
+  leftIcon?: React.ReactNode;
   /** Optional click handler for the entire item. */
   onClick?: () => void;
+  /** Optional background color for the item. */
+  backgroundColor?: string;
+  /** Optional background color for the item on hover. */
+  hoverBackgroundColor?: string;
 }
 
-const GenericListItem: React.FC<GenericListItemProps> = ({ content, actions, onClick }) => {
+const GenericListItem: React.FC<GenericListItemProps> = ({
+  content,
+  actions,
+  leftIcon,
+  onClick,
+  backgroundColor = '#f6f6f9',
+  hoverBackgroundColor = '#97c9fc',
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const itemStyle: React.CSSProperties = {
@@ -18,14 +31,27 @@ const GenericListItem: React.FC<GenericListItemProps> = ({ content, actions, onC
     alignItems: 'center',
     padding: '0 15px',
     minHeight: '50px',
-    border: '1px solid #ccc',
-    borderRadius: '8px',
+    borderRadius: '4px',
     marginBottom: '10px',
-    backgroundColor: isHovered ? '#97c9fc' : '#f6f6f9',
+    backgroundColor: isHovered ? hoverBackgroundColor : backgroundColor,
     textAlign: 'start',
     cursor: onClick ? 'pointer' : 'default',
-    transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
-    boxShadow: isHovered ? '0 8px 16px rgba(0, 0, 0, 0.2)' : '0 2px 4px rgba(0, 0, 0, 0.1)',
+    transition: 'background-color 0.3s ease',
+    boxShadow: '0 1px 1px #b3b3b3',
+    position: 'relative', // Needed for absolute positioning of leftIcon
+  };
+
+  const leftIconContainerStyle: React.CSSProperties = {
+    position: 'absolute',
+    left: '15px', // Aligns with padding
+    top: '50%',
+    transform: 'translateY(-50%)',
+    display: 'flex',
+    alignItems: 'center',
+  };
+
+  const contentStyle: React.CSSProperties = {
+    flexGrow: 1,
   };
 
   return (
@@ -35,7 +61,8 @@ const GenericListItem: React.FC<GenericListItemProps> = ({ content, actions, onC
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
     >
-      <div>{content}</div>
+      {leftIcon && <div style={leftIconContainerStyle}>{leftIcon}</div>}
+      <div style={contentStyle}>{content}</div>
       {isHovered && actions}
     </div>
   );

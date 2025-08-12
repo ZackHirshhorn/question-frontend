@@ -7,7 +7,6 @@ interface AddItemListItemProps {
 
 const AddItemListItem: React.FC<AddItemListItemProps> = ({ onClick, text }) => {
   const itemStyle: React.CSSProperties = {
-    padding: '15px',
     border: '2px dashed #ccc',
     borderRadius: '8px',
     marginBottom: '10px',
@@ -17,6 +16,7 @@ const AddItemListItem: React.FC<AddItemListItemProps> = ({ onClick, text }) => {
     display: 'flex',
     alignItems: 'center',
     color: '#555',
+    minHeight: '50px',
   };
 
   const plusIconStyle: React.CSSProperties = {

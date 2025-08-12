@@ -1,12 +1,21 @@
 import axiosClient from './axiosClient';
+import { sanitizeTemplate } from './sanitizeTemplate';
 
-interface TemplateData {
-  // Define the properties for a template
+interface Category {
   name: string;
-  content: Record<string, unknown>;
+  questions: any[];
 }
 
-export const createTemplate = (data: TemplateData) => {
+interface Template {
+  name: string;
+  categories: Category[];
+}
+
+interface TemplatePayload {
+  template: Template;
+}
+
+export const createTemplate = (data: TemplatePayload) => {
   return axiosClient.post('/template', data);
 };
 
@@ -22,16 +31,19 @@ export const canCreateQuestionnaires = () => {
   return axiosClient.head(`/template/search?page=1&pageSize=1`);
 };
 
-export const getTemplate = (id: string) => {
-  return axiosClient.get(`/template/${id}`);
+export const getTemplate = async (id: string) => {
+  const response = await axiosClient.get(`/template/${id}`);
+  // Mutate the response data in place to discard unnecessary populated question objects.
+  sanitizeTemplate(response.data);
+  return response;
 };
 
 export const deleteTemplate = (id: string) => {
   return axiosClient.delete(`/template/${id}`);
 };
 
-export const updateTemplate = (id: string, data: Partial<TemplateData>) => {
-  return axiosClient.put(`/template/${id}`, data);
+export const updateTemplate = (id: string, data: Partial<Template>) => {
+  return axiosClient.put(`/template/${id}`, { template: data });
 };
 
 export const searchTemplates = (name: string) => {

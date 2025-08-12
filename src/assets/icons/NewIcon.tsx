@@ -1,8 +1,12 @@
+import React from 'react';
+import './Icon.css';
 
-const NewIcon = () => (
-<svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M3.98899 10.4659V4.84091H4.94354V10.4659H3.98899ZM1.65376 8.13068V7.17614H7.27876V8.13068H1.65376ZM12.3935 3.27273V12H11.3366V4.38068H11.2855L9.15483 5.79545V4.72159L11.3366 3.27273H12.3935Z" fill="black"/>
-</svg>
+const NewIcon: React.FC = () => (
+  <div className="icon-container">
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.98899 15.4659V9.84091H10.9435V15.4659H9.98899ZM7.65376 13.1307V12.1761H13.2788V13.1307H7.65376ZM18.3935 8.27273V17H17.3366V9.38068H17.2855L15.1548 10.7955V9.72159L17.3366 8.27273H18.3935Z" fill="black"/>
+    </svg>
+  </div>
 );
 
 export default NewIcon;

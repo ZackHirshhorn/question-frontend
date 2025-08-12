@@ -1,3 +1,5 @@
+/* src/components/CreateTemplate.css */
+
 .popup-overlay {
     position: fixed;
     top: 0;
@@ -32,3 +34,14 @@
     justify-content: flex-end;
     gap: 10px;
   }
+
+  .category-row {
+    display: flex;
+    margin-bottom: 5px;
+  }
+  
+  .category-row input {
+    flex-grow: 1;
+  }
+
+  

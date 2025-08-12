@@ -1,11 +1,9 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 
-interface TopBarProps {
-  activeTab: string;
-  onTabChange: (tab: 'questionnaires' | 'responses') => void;
-}
+const TopBar: React.FC = () => {
+  const location = useLocation();
 
-const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange }) => {
   const topBarStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -19,8 +17,8 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange }) => {
     justifyContent: 'center', // Center the content horizontally
   };
 
-  const getLinkStyle = (tabName: 'questionnaires' | 'responses'): React.CSSProperties => {
-    const isActive = activeTab === tabName;
+  const getLinkStyle = (path: string): React.CSSProperties => {
+    const isActive = location.pathname.startsWith(path);
     return {
       textDecoration: isActive ? 'underline' : 'none',
       color: isActive ? '#007bff' : 'black',
@@ -34,16 +32,16 @@ const TopBar: React.FC<TopBarProps> = ({ activeTab, onTabChange }) => {
     <div style={topBarStyle}>
       {/* Right Half (due to RTL) */}
       <div style={tabStyle}>
-        <a onClick={() => onTabChange('questionnaires')} style={getLinkStyle('questionnaires')}>
+        <Link to="/templates" style={getLinkStyle('/templates')}>
           שאלונים
-        </a>
+        </Link>
       </div>
 
       {/* Left Half */}
       <div style={tabStyle}>
-        <a onClick={() => onTabChange('responses')} style={getLinkStyle('responses')}>
+        <Link to="/responses" style={getLinkStyle('/responses')}>
           תגובות
-        </a>
+        </Link>
       </div>
     </div>
   );

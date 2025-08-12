@@ -1,21 +1,20 @@
+// src/components/SubCategoryListItem.tsx
 import React from 'react';
 import GenericListItem from './GenericListItem';
 import EditIcon from '../assets/icons/EditIcon';
 import TrashIcon from '../assets/icons/TrashIcon';
 import PlusWithQuestionIcon from '../assets/icons/PlusWithQuestionIcon';
 import NewIcon from '../assets/icons/NewIcon';
-import TriangleIcon from '../assets/icons/TriangleIcon';
 import '../assets/icons/Icon.css';
 import Tooltip from './Tooltip';
 
-interface CategoryListItemProps {
+interface SubCategoryListItemProps {
   content: string;
-  isExpanded: boolean;
   onClick: () => void;
   onRenameClick: () => void;
   onDeleteClick: () => void;
   onPlusQuestionClick: () => void;
-  onNewClick: () => void;
+  onNewClick: () => void; // Assuming this will be for adding topics later
 }
 
 const IconWrapper = ({ tooltipText, onClick, children }) => {
@@ -33,9 +32,8 @@ const IconWrapper = ({ tooltipText, onClick, children }) => {
   );
 };
 
-const CategoryListItem: React.FC<CategoryListItemProps> = ({
+const SubCategoryListItem: React.FC<SubCategoryListItemProps> = ({
   content,
-  isExpanded,
   onClick,
   onRenameClick,
   onDeleteClick,
@@ -46,8 +44,6 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
     display: 'flex',
     gap: '10px',
     alignItems: 'center',
-    transition: 'margin-left 0.3s ease-in-out',
-    marginLeft: isExpanded ? '24px' : '0px', // Creates space for the triangle
   };
 
   const actions = (
@@ -61,7 +57,7 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
       <IconWrapper tooltipText="שינוי שם" onClick={onRenameClick}>
         <EditIcon />
       </IconWrapper>
-      <IconWrapper tooltipText="הוספת תת-קטגוריה" onClick={onNewClick}>
+      <IconWrapper tooltipText="הוספת נושא" onClick={onNewClick}>
         <NewIcon />
       </IconWrapper>
     </div>
@@ -72,13 +68,10 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
       content={content}
       onClick={onClick}
       actions={actions}
-      leftIcon={<TriangleIcon isRotated={isExpanded} isVisible={isExpanded} />}
-      backgroundColor="#d3e9fe"
-      hoverBackgroundColor="#97c9fc"
+      backgroundColor="#dffeee"
+      hoverBackgroundColor="#b8f4d4"
     />
   );
 };
 
-export default CategoryListItem;
-
-
+export default SubCategoryListItem;

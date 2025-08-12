@@ -1,41 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import GenericListItem from './GenericListItem';
-import EditIcon from '../assets/icons/EditIcon';
 import TrashIcon from '../assets/icons/TrashIcon';
-import PlusIcon from '../assets/icons/PlusIcon';
+import '../assets/icons/Icon.css';
+import Tooltip from './Tooltip';
 
 interface TemplateListItemProps {
   content: string;
   onClick: () => void;
-  onEditClick: () => void;
   onDeleteClick: () => void;
-  onPlusClick: () => void;
 }
 
 const TemplateListItem: React.FC<TemplateListItemProps> = ({
   content,
   onClick,
-  onEditClick,
   onDeleteClick,
-  onPlusClick,
 }) => {
-  const iconContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    gap: '10px',
-    alignItems: 'center',
-    position: 'relative',
-    top: '2px',
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
   };
 
-  const iconStyle: React.CSSProperties = {
-    cursor: 'pointer',
+  const handleMouseLeave = () => {
+    setIsHovered(false);
   };
 
   const actions = (
-    <div style={iconContainerStyle}>
-      <span style={iconStyle} onClick={(e) => { e.stopPropagation(); onPlusClick(); }}><PlusIcon /></span>
-      <span style={iconStyle} onClick={(e) => { e.stopPropagation(); onDeleteClick(); }}><TrashIcon /></span>
-      <span style={iconStyle} onClick={(e) => { e.stopPropagation(); onEditClick(); }}><EditIcon /></span>
+    <div 
+      className="icon-wrapper" 
+      onClick={(e) => { e.stopPropagation(); onDeleteClick(); }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <TrashIcon />
+      <Tooltip text="מחיקה" visible={isHovered} />
     </div>
   );
 

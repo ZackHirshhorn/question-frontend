@@ -1,0 +1,84 @@
+/* src/components/Button.css */
+
+.button-primary {
+  background-color: #2b49cd;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 10px;
+  outline: none;
+}
+
+.button-primary:hover, .button-primary:focus {
+  background-color: #3c59d1;
+  outline: none;
+}
+
+.button-primary:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.button-danger {
+  background-color: #e21d57;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 10px;
+  outline: none;
+}
+
+.button-danger:hover, .button-danger:focus {
+  background-color: #c71a4c;
+  outline: none;
+}
+
+.button-secondary {
+  background-color: transparent;
+  border: 1px solid transparent;
+  color: #2b49cd;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 10px;
+  outline: none;
+}
+
+.button-secondary:hover, .button-secondary:focus {
+  border-color: transparent;
+  outline: none;
+}
+
+.button-secondary:active {
+  border-color: #2b49cd;
+  outline: none;
+}
+
+.button-tab {
+  width: 50%;
+  padding: 10px;
+  cursor: pointer;
+  background-color: #f1f1f1;
+  color: black;
+  border: none;
+}
+
+.button-tab.active {
+  background-color: lightgray;
+}

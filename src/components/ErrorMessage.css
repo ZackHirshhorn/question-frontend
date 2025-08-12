@@ -1,0 +1,14 @@
+.error-message {
+  transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.error-message.show {
+  opacity: 1;
+  max-height: 20px; /* Adjust as needed */
+}

@@ -1,0 +1,26 @@
+/* src/assets/icons/Icon.css */
+
+.icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.icon-wrapper:hover {
+  background-color: rgba(0, 0, 0, 0.3); /* 30% transparent black overlay */
+}
+
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}

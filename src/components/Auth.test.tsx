@@ -21,13 +21,13 @@ describe('Auth Component', () => {
 
     // Check for the tab buttons
     const tabContainer = screen.getByRole('tablist');
-    expect(within(tabContainer).getByRole('tab', { name: /login/i })).toBeInTheDocument();
-    expect(within(tabContainer).getByRole('tab', { name: /register/i })).toBeInTheDocument();
+    expect(within(tabContainer).getByRole('tab', { name: 'התחברות' })).toBeInTheDocument();
+    expect(within(tabContainer).getByRole('tab', { name: 'הרשמה' })).toBeInTheDocument();
 
 
     // Check that the login form is visible
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('דוא"ל:')).toBeInTheDocument();
+    expect(screen.getByLabelText('סיסמה:')).toBeInTheDocument();
   });
 
   test('shows the register form with password confirmation when the register tab is clicked', () => {
@@ -37,13 +37,13 @@ describe('Auth Component', () => {
       </Provider>
     );
 
-    const registerTab = screen.getByRole('tab', { name: /register/i });
+    const registerTab = screen.getByRole('tab', { name: 'הרשמה' });
     fireEvent.click(registerTab);
 
-    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText('שם:')).toBeInTheDocument();
+    expect(screen.getByLabelText('דוא"ל:')).toBeInTheDocument();
+    expect(screen.getByLabelText('סיסמה:')).toBeInTheDocument();
+    expect(screen.getByLabelText('אישור סיסמה:')).toBeInTheDocument();
   });
 
   test('does not submit the form when passwords do not match', async () => {
@@ -55,12 +55,12 @@ describe('Auth Component', () => {
       </Provider>
     );
 
-    const registerTab = screen.getByRole('tab', { name: /register/i });
+    const registerTab = screen.getByRole('tab', { name: 'הרשמה' });
     fireEvent.click(registerTab);
 
-    const passwordInput = screen.getByLabelText(/^password/i);
-    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const registerButton = screen.getByRole('button', { name: /register/i });
+    const passwordInput = screen.getByLabelText('סיסמה:');
+    const confirmPasswordInput = screen.getByLabelText('אישור סיסמה:');
+    const registerButton = screen.getByRole('button', { name: 'הרשמה' });
 
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
     fireEvent.change(confirmPasswordInput, { target: { value: 'password456' } });
@@ -78,14 +78,14 @@ describe('Auth Component', () => {
       </Provider>
     );
 
-    const registerTab = screen.getByRole('tab', { name: /register/i });
+    const registerTab = screen.getByRole('tab', { name: 'הרשמה' });
     fireEvent.click(registerTab);
 
-    const nameInput = screen.getByLabelText(/name/i);
-    const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/^password/i);
-    const confirmPasswordInput = screen.getByLabelText(/confirm password/i);
-    const registerButton = screen.getByRole('button', { name: /register/i });
+    const nameInput = screen.getByLabelText('שם:');
+    const emailInput = screen.getByLabelText('דוא"ל:');
+    const passwordInput = screen.getByLabelText('סיסמה:');
+    const confirmPasswordInput = screen.getByLabelText('אישור סיסמה:');
+    const registerButton = screen.getByRole('button', { name: 'הרשמה' });
 
     fireEvent.change(nameInput, { target: { value: 'Test User' } });
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
