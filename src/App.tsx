@@ -1,12 +1,12 @@
-import { useState } from 'react'; // Import useState
 import { useDispatch, useSelector } from 'react-redux';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import Auth from './components/Auth';
 import TopMenu from './components/TopMenu';
-import TopBar from './components/TopBar';
 import Templates from './components/Templates';
 import Responses from './components/Responses';
 import TemplateView from './components/TemplateView';
+import MainLayout from './components/MainLayout';
 import { logout as logoutAction } from './store/userSlice';
 import { logout as logoutApi } from './api/auth';
 import type { RootState } from './store';
@@ -14,8 +14,7 @@ import type { RootState } from './store';
 function App() {
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState<'questionnaires' | 'responses'>('questionnaires');
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -28,11 +27,11 @@ function App() {
   };
 
   const handleSelectTemplate = (templateId: string) => {
-    setSelectedTemplateId(templateId);
+    navigate(`/templates/${templateId}`);
   };
 
   const handleBack = () => {
-    setSelectedTemplateId(null);
+    navigate('/templates');
   };
 
   return (
@@ -48,15 +47,14 @@ function App() {
           </div>
 
           <div className="main-container">
-            {selectedTemplateId ? (
-              <TemplateView templateId={selectedTemplateId} onBack={handleBack} />
-            ) : (
-              <>
-                <TopBar activeTab={activeTab} onTabChange={setActiveTab} />
-                {activeTab === 'questionnaires' && <Templates onTemplateClick={handleSelectTemplate} />}
-                {activeTab === 'responses' && <Responses />}
-              </>
-            )}
+            <Routes>
+              <Route element={<MainLayout />}>
+                <Route path="/" element={<Templates onTemplateClick={handleSelectTemplate} />} />
+                <Route path="/templates" element={<Templates onTemplateClick={handleSelectTemplate} />} />
+                <Route path="/responses" element={<Responses />} />
+              </Route>
+              <Route path="/templates/:templateId" element={<TemplateView onBack={handleBack} />} />
+            </Routes>
           </div>
         </>
       ) : (
@@ -67,4 +65,3 @@ function App() {
 }
 
 export default App;
-

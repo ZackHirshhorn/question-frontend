@@ -1,3 +1,4 @@
+// src/components/SubCategoryListItem.tsx
 import React from 'react';
 import GenericListItem from './GenericListItem';
 import EditIcon from '../assets/icons/EditIcon';
@@ -7,13 +8,13 @@ import NewIcon from '../assets/icons/NewIcon';
 import '../assets/icons/Icon.css';
 import Tooltip from './Tooltip';
 
-interface CategoryListItemProps {
+interface SubCategoryListItemProps {
   content: string;
   onClick: () => void;
   onRenameClick: () => void;
   onDeleteClick: () => void;
   onPlusQuestionClick: () => void;
-  onNewClick: () => void;
+  onNewClick: () => void; // Assuming this will be for adding topics later
 }
 
 const IconWrapper = ({ tooltipText, onClick, children }) => {
@@ -31,7 +32,7 @@ const IconWrapper = ({ tooltipText, onClick, children }) => {
   );
 };
 
-const CategoryListItem: React.FC<CategoryListItemProps> = ({
+const SubCategoryListItem: React.FC<SubCategoryListItemProps> = ({
   content,
   onClick,
   onRenameClick,
@@ -56,7 +57,7 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
       <IconWrapper tooltipText="שינוי שם" onClick={onRenameClick}>
         <EditIcon />
       </IconWrapper>
-      <IconWrapper tooltipText="הוספת תת-קטגוריה" onClick={onNewClick}>
+      <IconWrapper tooltipText="הוספת נושא" onClick={onNewClick}>
         <NewIcon />
       </IconWrapper>
     </div>
@@ -67,8 +68,10 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
       content={content}
       onClick={onClick}
       actions={actions}
+      backgroundColor="#b8f4d4"
+      hoverBackgroundColor="#b8f4d4"
     />
   );
 };
 
-export default CategoryListItem;
+export default SubCategoryListItem;

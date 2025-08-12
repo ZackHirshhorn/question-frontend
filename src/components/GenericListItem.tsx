@@ -7,9 +7,19 @@ interface GenericListItemProps {
   actions?: React.ReactNode;
   /** Optional click handler for the entire item. */
   onClick?: () => void;
+  /** Optional background color for the item. */
+  backgroundColor?: string;
+  /** Optional background color for the item on hover. */
+  hoverBackgroundColor?: string;
 }
 
-const GenericListItem: React.FC<GenericListItemProps> = ({ content, actions, onClick }) => {
+const GenericListItem: React.FC<GenericListItemProps> = ({
+  content,
+  actions,
+  onClick,
+  backgroundColor = '#f6f6f9',
+  hoverBackgroundColor = '#97c9fc',
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const itemStyle: React.CSSProperties = {
@@ -21,7 +31,7 @@ const GenericListItem: React.FC<GenericListItemProps> = ({ content, actions, onC
     border: '1px solid #ccc',
     borderRadius: '8px',
     marginBottom: '10px',
-    backgroundColor: isHovered ? '#97c9fc' : '#f6f6f9',
+    backgroundColor: isHovered ? hoverBackgroundColor : backgroundColor,
     textAlign: 'start',
     cursor: onClick ? 'pointer' : 'default',
     transition: 'background-color 0.3s ease, box-shadow 0.3s ease',
