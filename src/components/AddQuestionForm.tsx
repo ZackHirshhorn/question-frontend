@@ -1,6 +1,7 @@
 import React from 'react';
 import TextInput from './TextInput';
 import QuestionOptions from './QuestionOptions';
+import TypeSelect from './TypeSelect';
 import QuestionNumber from './QuestionNumber';
 
 type QuestionDraft = any;
@@ -27,15 +28,17 @@ const AddQuestionForm: React.FC<AddQuestionFormProps> = ({ draft, onChange, onSa
           />
         </div>
         <div className="question-form-cell">
-          <select
+          <TypeSelect
+            ariaLabel="סוג השאלה"
             value={draft?.qType || 'טקסט'}
-            onChange={(e) => onChange({ ...draft, qType: e.target.value })}
-          >
-            <option value="טקסט">טקסט</option>
-            <option value="בחירה מרובה">בחירה מרובה</option>
-            <option value="בחירה יחידה">בחירה יחידה</option>
-            <option value="מספר">מספר</option>
-          </select>
+            options={[
+              { value: 'טקסט', label: 'טקסט' },
+              { value: 'בחירה מרובה', label: 'בחירה מרובה' },
+              { value: 'בחירה יחידה', label: 'בחירה יחידה' },
+              { value: 'מספר', label: 'מספר' },
+            ]}
+            onChange={(val) => onChange({ ...draft, qType: val })}
+          />
         </div>
         <div className="question-form-cell question-form-warning">
           <div className="popup-warning">רשימת הסוגים מוגדרת מקומית כרגע</div>

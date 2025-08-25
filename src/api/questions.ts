@@ -11,8 +11,12 @@ export const createQuestionCollection = (data: QuestionCollectionData) => {
 };
 
 // Exact backend shape for creation: { colName, questions }
-export const createQuestionsCol = (colName: string, questions: Record<string, unknown>[] = []) => {
-  return axiosClient.post('/questions', { colName, questions });
+export const createQuestionsCol = (
+  colName: string,
+  questions: Record<string, unknown>[] = [],
+  description?: string
+) => {
+  return axiosClient.post('/questions', { colName, questions, description });
 };
 
 // Fetch question collections. If a value is provided, it searches by name; otherwise,
@@ -23,7 +27,8 @@ export const searchQuestionCollections = (value?: string, page = 1, pageSize = 5
   if (page) params.set('page', String(page));
   if (pageSize) params.set('pageSize', String(pageSize));
   const qs = params.toString();
-  return axiosClient.get(`/questions/search${qs ? `?${qs}` : ''}`);
+  // For Admin users, fetch the authenticated user's collections
+  return axiosClient.get(`/questions/user${qs ? `?${qs}` : ''}`);
 };
 
 export const getQuestionCollection = (id: string) => {

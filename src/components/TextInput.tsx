@@ -6,14 +6,16 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   showCheck?: boolean;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
+  wrapperClassName?: string;
+  inputClassName?: string;
 }
 
-const TextInput: React.FC<TextInputProps> = ({ showCheck, startAdornment, endAdornment, ...props }) => {
+const TextInput: React.FC<TextInputProps> = ({ showCheck, startAdornment, endAdornment, wrapperClassName, inputClassName, ...props }) => {
   return (
-    <div className="input-wrapper">
+    <div className={`input-wrapper${wrapperClassName ? ` ${wrapperClassName}` : ''}`}>
       {startAdornment}
       {showCheck && !startAdornment && <CheckIcon />}
-      <input {...props} />
+      <input className={inputClassName} {...props} />
       {endAdornment}
     </div>
   );
