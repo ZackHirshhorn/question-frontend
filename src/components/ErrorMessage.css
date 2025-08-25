@@ -3,7 +3,7 @@
   opacity: 0;
   max-height: 0;
   overflow: hidden;
-  color: red;
+  color: #B00020; /* unify with popup-warning */
   font-size: 12px;
   margin-top: 5px;
 }

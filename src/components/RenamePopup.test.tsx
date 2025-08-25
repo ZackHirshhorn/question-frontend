@@ -1,12 +1,12 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import RenameCategoryPopup from './RenameCategoryPopup';
+import RenamePopup from './RenamePopup';
 
-describe('RenameCategoryPopup', () => {
+describe('RenamePopup', () => {
   it('disables save on duplicate and unchanged, enables on unique', () => {
     const onClose = vi.fn();
     const onSave = vi.fn();
     render(
-      <RenameCategoryPopup
+      <RenamePopup
         currentName="Orig"
         onClose={onClose}
         onSave={onSave}
@@ -33,4 +33,3 @@ describe('RenameCategoryPopup', () => {
     expect(onSave).toHaveBeenCalledWith('NewName');
   });
 });
-

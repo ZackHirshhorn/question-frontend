@@ -67,3 +67,48 @@ export default tseslint.config([
   },
 ])
 ```
+
+## UI Popups
+
+- Use `CreateNamesPopup` for generic "add names" flows (categories, sub‑categories, topics). It accepts labels and messages via props and enforces duplicate validation and a consistent save/cancel experience with an optional spinner.
+- Other popups include `CreateTemplatePopup`, `CreateQuestionsColPopup`, `PreviewQuestionsColPopup`, `ConfirmDeletePopup`, and `RenamePopup`.
+
+## Question Collections: Shared State + Popup
+
+The שאלות tab and the שאלונים (Template View) both need access to question collections.
+
+- Redux slice: `src/store/questionCollectionsSlice.ts`
+  - Provides `items`, `loading`, `error`, and optional `allNames` cache.
+  - Actions: `fetchStart`, `fetchSuccess`, `fetchFailure`, `setAllNames`.
+  - Selectors: `selectCollections`, `selectCollectionsLoading`, `selectCollectionsError`.
+  - Shape is minimal: `{ _id, name, description?, size? }`.
+
+- Popup component: `src/components/SelectQuestionsColPopup.tsx`
+  - Displays a single-choice (radio) list of collections with name/description/count.
+  - Reads from the Redux slice and fetches on first mount if empty (via `searchQuestionCollections`).
+  - API:
+    - `title?`: optional heading text
+    - `onClose()`: close handler
+    - `onSelect?(collection)`: called on confirm with the chosen collection
+
+Usage pattern (inside a parent component):
+
+```tsx
+const [open, setOpen] = useState(false);
+return (
+  <>
+    <button onClick={() => setOpen(true)}>הוספת שאלה</button>
+    {open && (
+      <SelectQuestionsColPopup
+        onClose={() => setOpen(false)}
+        onSelect={(col) => {
+          console.log('Selected', col);
+          setOpen(false);
+        }}
+      />
+    )}
+  </>
+);
+```
+
+This approach avoids duplicating fetching logic and keeps the UI consistent across tabs.

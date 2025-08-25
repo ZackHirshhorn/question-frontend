@@ -1,16 +1,21 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateTopicPopup from './CreateTopicPopup';
+import CreateNamesPopup from './CreateNamesPopup';
 
-describe('CreateTopicPopup', () => {
+describe('CreateTopicPopup (via CreateNamesPopup)', () => {
   it('disables save on duplicate and shows error', () => {
     const onClose = vi.fn();
     const onCreate = vi.fn();
     render(
-      <CreateTopicPopup
-        subCategoryName="Sub"
+      <CreateNamesPopup
+        title={`הוספת נושא חדש עבור Sub`}
+        fieldLabel="שם הנושא"
+        addButtonText="הוסף עוד"
+        primaryButtonText="שמור"
+        savingText="שומר…"
+        duplicateErrorText="נושא עם שם זה כבר קיים."
+        existingNames={['X']}
         onClose={onClose}
         onCreate={onCreate}
-        existingTopicNames={['X']}
       />
     );
     const input = screen.getByRole('textbox');
@@ -24,11 +29,16 @@ describe('CreateTopicPopup', () => {
     const onClose = vi.fn();
     const onCreate = vi.fn();
     render(
-      <CreateTopicPopup
-        subCategoryName="Sub"
+      <CreateNamesPopup
+        title={`הוספת נושא חדש עבור Sub`}
+        fieldLabel="שם הנושא"
+        addButtonText="הוסף עוד"
+        primaryButtonText="שמור"
+        savingText="שומר…"
+        duplicateErrorText="נושא עם שם זה כבר קיים."
+        existingNames={[]}
         onClose={onClose}
         onCreate={onCreate}
-        existingTopicNames={[]}
       />
     );
     const addButton = screen.getByRole('button', { name: 'הוסף עוד' });

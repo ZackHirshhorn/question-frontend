@@ -3,16 +3,18 @@ import './Button.css';
 import TextInput from './TextInput';
 import AnimatedErrorMessage from './AnimatedErrorMessage';
 import './CreateTemplate.css';
+import SpinnerIcon from '../assets/icons/SpinnerIcon';
 
-interface RenameCategoryPopupProps {
+interface RenamePopupProps {
   currentName: string;
   onClose: () => void;
   onSave: (newName: string) => void;
   title: string;
   existingNames: string[];
+  saving?: boolean;
 }
 
-const RenameCategoryPopup: React.FC<RenameCategoryPopupProps> = ({ currentName, onClose, onSave, title, existingNames }) => {
+const RenamePopup: React.FC<RenamePopupProps> = ({ currentName, onClose, onSave, title, existingNames, saving = false }) => {
   const [newName, setNewName] = useState(currentName);
 
   const trimmed = newName.trim();
@@ -33,8 +35,6 @@ const RenameCategoryPopup: React.FC<RenameCategoryPopupProps> = ({ currentName, 
     event.preventDefault();
     if (canSave) {
       onSave(trimmed);
-    } else {
-      onClose(); // Close if the name is unchanged or empty
     }
   };
 
@@ -56,11 +56,14 @@ const RenameCategoryPopup: React.FC<RenameCategoryPopupProps> = ({ currentName, 
             <AnimatedErrorMessage message={error} />
           </div>
           <div className="form-actions">
-            <button type="button" className="button-secondary" onClick={onClose}>
+            <button type="button" className="button-secondary" onClick={onClose} disabled={saving}>
               ביטול
             </button>
-            <button type="submit" className="button-primary" disabled={!canSave}>
-              שמירה
+            <button type="submit" className="button-primary" disabled={!canSave || saving} aria-busy={saving}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+            >
+              {saving && <SpinnerIcon />}
+              {saving ? 'שומר…' : 'שמירה'}
             </button>
           </div>
         </form>
@@ -69,4 +72,4 @@ const RenameCategoryPopup: React.FC<RenameCategoryPopupProps> = ({ currentName, 
   );
 };
 
-export default RenameCategoryPopup;
+export default RenamePopup;

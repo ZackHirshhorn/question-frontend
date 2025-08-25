@@ -1,4 +1,8 @@
 // src/components/SubCategoryListItem.tsx
+/**
+ * SubCategoryListItem renders a single subcategory row with its action icons.
+ * Purely presentational: all behavior is delegated via props to the parent.
+ */
 import React from 'react';
 import GenericListItem from './GenericListItem';
 import EditIcon from '../assets/icons/EditIcon';
@@ -9,6 +13,15 @@ import '../assets/icons/Icon.css';
 import TriangleIcon from '../assets/icons/TriangleIcon';
 import Tooltip from './Tooltip';
 
+/**
+ * Props for SubCategoryListItem
+ * - content: display name of the subcategory
+ * - isExpanded: whether child topics are visible
+ * - onClick: toggles expansion (handled by parent)
+ * - onRenameClick/onDeleteClick: action icons for rename/delete
+ * - onPlusQuestionClick: fired when user clicks "הוספת שאלה"
+ * - onNewClick: add a new topic under this subcategory
+ */
 interface SubCategoryListItemProps {
   content: string;
   isExpanded?: boolean;
@@ -19,20 +32,25 @@ interface SubCategoryListItemProps {
   onNewClick: () => void; // Assuming this will be for adding topics later
 }
 
-const IconWrapper = ({ tooltipText, onClick, children }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-  return (
-    <div
-      className="icon-wrapper"
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {children}
-      <Tooltip text={tooltipText} visible={isHovered} />
-    </div>
-  );
-};
+/** Tooltip-enabled wrapper for clickable icons */
+const IconWrapper: React.FC<{ tooltipText: string; onClick?: () => void; children: React.ReactNode }>
+  = ({ tooltipText, onClick, children }) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+    return (
+      <button
+        type="button"
+        className="icon-wrapper"
+        aria-label={tooltipText}
+        onClick={(e) => { e.stopPropagation(); if (onClick) onClick(); }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+      >
+        {children}
+        <Tooltip text={tooltipText} visible={isHovered} />
+      </button>
+    );
+  };
 
 const SubCategoryListItem: React.FC<SubCategoryListItemProps> = ({
   content,

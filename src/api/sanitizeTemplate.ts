@@ -1,39 +1,58 @@
 // src/api/sanitizeTemplate.ts
 
-// This function recursively traverses the template object and MUTATES it in place.
-// Any 'questions' array containing objects is replaced by an array of strings (_id).
-export const sanitizeTemplate = (template: any): void => {
-  if (!template || typeof template !== 'object' || !Array.isArray(template.categories)) {
-    return;
-  }
+type QuestionLike = string | { _id: string };
 
-  template.categories.forEach((category: any) => {
-    if (category && typeof category === 'object') {
-      // Sanitize category questions
-      if (Array.isArray(category.questions) && category.questions.length > 0 && typeof category.questions[0] === 'object') {
-        category.questions = category.questions.map((q: any) => q._id);
-      }
+type TopicLike = {
+  name?: string;
+  questions?: QuestionLike[];
+};
 
-      // Sanitize sub-categories
-      if (Array.isArray(category.subCategories)) {
-        category.subCategories.forEach((subCategory: any) => {
-          if (subCategory && typeof subCategory === 'object') {
-            // Sanitize sub-category questions
-            if (Array.isArray(subCategory.questions) && subCategory.questions.length > 0 && typeof subCategory.questions[0] === 'object') {
-              subCategory.questions = subCategory.questions.map((q: any) => q._id);
+type SubCategoryLike = {
+  name?: string;
+  questions?: QuestionLike[];
+  topics?: TopicLike[];
+};
+
+type CategoryLike = {
+  name?: string;
+  questions?: QuestionLike[];
+  subCategories?: SubCategoryLike[];
+};
+
+type TemplateLike = {
+  name?: string;
+  categories?: CategoryLike[];
+};
+
+const toIds = (arr: QuestionLike[]): string[] => arr.map((q) => (typeof q === 'string' ? q : q._id));
+
+// Recursively traverse the template object and MUTATE it in place.
+// Any 'questions' array containing objects is replaced by an array of string IDs (_id).
+export const sanitizeTemplate = (template: unknown): void => {
+  const t = template as TemplateLike | null | undefined;
+  if (!t || !Array.isArray(t.categories)) return;
+
+  t.categories.forEach((category) => {
+    if (!category) return;
+    if (Array.isArray(category.questions) && category.questions.length > 0 && typeof category.questions[0] !== 'string') {
+      category.questions = toIds(category.questions);
+    }
+
+    if (Array.isArray(category.subCategories)) {
+      category.subCategories.forEach((sub) => {
+        if (!sub) return;
+        if (Array.isArray(sub.questions) && sub.questions.length > 0 && typeof sub.questions[0] !== 'string') {
+          sub.questions = toIds(sub.questions);
+        }
+        if (Array.isArray(sub.topics)) {
+          sub.topics.forEach((topic) => {
+            if (!topic) return;
+            if (Array.isArray(topic.questions) && topic.questions.length > 0 && typeof topic.questions[0] !== 'string') {
+              topic.questions = toIds(topic.questions);
             }
-
-            // Sanitize topics
-            if (Array.isArray(subCategory.topics)) {
-              subCategory.topics.forEach((topic: any) => {
-                if (topic && typeof topic === 'object' && Array.isArray(topic.questions) && topic.questions.length > 0 && typeof topic.questions[0] === 'object') {
-                  topic.questions = topic.questions.map((q: any) => q._id);
-                }
-              });
-            }
-          }
-        });
-      }
+          });
+        }
+      });
     }
   });
 };

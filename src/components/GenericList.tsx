@@ -25,7 +25,7 @@ const listStyle: React.CSSProperties = {
  * It is unopinionated about how the items are rendered, which is
  * controlled by the `renderItem` prop.
  */
-const GenericList = <T extends {}>({
+const GenericList = <T extends object>({
   items,
   keyExtractor,
   renderItem,
