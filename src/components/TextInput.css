@@ -23,7 +23,3 @@
   letter-spacing: 0;
   text-align: right;
 }
-
-.input-wrapper input:focus {
-  background-color: #E6EAFF;
-}

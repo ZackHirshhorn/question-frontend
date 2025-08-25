@@ -57,7 +57,7 @@ describe('TemplateView rename/delete', () => {
     await screen.findByText('TopNew');
   });
 
-  it('deletes a topic and persists', async () => {
+  it('topic delete hides immediately and shows undo banner', async () => {
     vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as any);
     const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
 
@@ -74,11 +74,11 @@ describe('TemplateView rename/delete', () => {
     const wrappers = document.querySelectorAll('.icon-wrapper');
     // trash index 1
     fireEvent.click(wrappers[1] as HTMLElement);
-    // Confirm delete
-    fireEvent.click(await screen.findByRole('button', { name: 'מחיקה' }));
 
-    await waitFor(() => expect(updateSpy).toHaveBeenCalled());
+    // Item disappears immediately from the view and undo banner appears
     await waitFor(() => expect(screen.queryByText('Top')).not.toBeInTheDocument());
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 
   it('renames a subcategory and persists', async () => {
@@ -102,7 +102,7 @@ describe('TemplateView rename/delete', () => {
     await screen.findByText('SubNew');
   });
 
-  it('deletes a category and persists', async () => {
+  it('category delete undo restores the item and prevents persistence', async () => {
     vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as any);
     const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
 
@@ -113,10 +113,36 @@ describe('TemplateView rename/delete', () => {
     const wrappers = document.querySelectorAll('.icon-wrapper');
     // category: plus?, trash, edit, new -> trash index 1
     fireEvent.click(wrappers[1] as HTMLElement);
-    fireEvent.click(await screen.findByRole('button', { name: 'מחיקה' }));
 
-    await waitFor(() => expect(updateSpy).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByText('Cat')).not.toBeInTheDocument());
+    // Undo
+    const undo = await screen.findByText('בטל');
+    fireEvent.click(undo);
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(await screen.findByText('Cat')).toBeInTheDocument();
+  });
+
+  it('subcategory delete hides and can be undone', async () => {
+    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as any);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
+
+    render(<TemplateView onBack={() => {}} />);
+
+    const catEl = await screen.findByText('Cat');
+    fireEvent.click(catEl);
+    const subEl = await screen.findByText('Sub');
+    fireEvent.mouseEnter(subEl.parentElement!);
+    const wrappers = document.querySelectorAll('.icon-wrapper');
+    // subcategory: plus?, trash, edit, new -> trash index 1 (after previous hovers may shift, but this is consistent here)
+    fireEvent.click(wrappers[1] as HTMLElement);
+
+    await waitFor(() => expect(screen.queryByText('Sub')).not.toBeInTheDocument());
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    // Undo
+    const undo = await screen.findByText('בטל');
+    fireEvent.click(undo);
+    expect(await screen.findByText('Sub')).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 });
-

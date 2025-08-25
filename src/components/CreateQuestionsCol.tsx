@@ -9,19 +9,26 @@ import AddQuestionForm from './AddQuestionForm';
 import TrashIcon from '../assets/icons/TrashIcon';
 import EditIcon from '../assets/icons/EditIcon';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
+import ExitButton from '../assets/icons/ExitButton';
 
 interface CreateQuestionsColProps {
   onClose: () => void;
   onCreated: () => void;
   existingNames: string[];
+  initial?: {
+    name?: string;
+    description?: string;
+    questions?: any[];
+  };
 }
 
-const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCreated, existingNames }) => {
-  const [name, setName] = useState('');
+const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCreated, existingNames, initial }) => {
+  const isEdit = !!initial;
+  const [name, setName] = useState(initial?.name || '');
   const [nameError, setNameError] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(initial?.description || '');
   // Committed questions that exist in the persisted set
-  const [questions, setQuestions] = useState<any[]>([
+  const [questions, setQuestions] = useState<any[]>(initial?.questions || [
     // Used to test the display when there are questions in the set:
     // { q: 'שאלה לדוגמה', qType: 'text', required: false },
   ]);
@@ -31,11 +38,22 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
+  const [nameActivated, setNameActivated] = useState(false);
+  const [descActivated, setDescActivated] = useState(false);
 
   const LS_KEY = 'create_questions_col_saved_questions';
 
-  // Load saved questions from localStorage on mount
+  // Initialize/refresh when `initial` changes
   useEffect(() => {
+    if (initial) {
+      setName(initial.name || '');
+      setDescription(initial.description || '');
+      setQuestions(Array.isArray(initial.questions) ? initial.questions : []);
+      return; // when editing existing, skip localStorage hydration
+    }
+    // Load saved questions from localStorage on mount when creating new
+    setName('');
+    setDescription('');
     try {
       const raw = window.localStorage.getItem(LS_KEY);
       if (raw) {
@@ -43,22 +61,25 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
         if (Array.isArray(parsed)) {
           setQuestions(parsed);
         }
+        return;
       }
     } catch (e) {
       // ignore localStorage errors
     }
-  }, []);
+    setQuestions([]);
+  }, [initial]);
 
   useEffect(() => {
     const trimmed = name.trim();
-    if (trimmed.length > 0 && existingNames.includes(trimmed)) {
+    const isDuplicate = existingNames.includes(trimmed) && (!initial || trimmed !== (initial.name || '').trim());
+    if (trimmed.length > 0 && isDuplicate) {
       setNameError('שם התבנית כבר קיים');
     } else if (trimmed.length > 0 && trimmed.length < 2) {
       setNameError('שם התבנית קצר מדי');
     } else {
       setNameError('');
     }
-  }, [name, existingNames]);
+  }, [name, existingNames, initial]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,16 +96,30 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
       // Normalize questions for server
       const payloadQuestions = questions.map((q) => {
         const qText = String(q?.q ?? '').trim();
-        const qType = q?.qType ?? 'טקסט';
+        const qTypeUI = q?.qType ?? 'טקסט';
+        // Map UI labels to backend enum values
+        const qTypeMap: Record<string, 'Text' | 'Multiple' | 'Single' | 'Number'> = {
+          'טקסט': 'Text',
+          'בחירה מרובה': 'Multiple',
+          'בחירה יחידה': 'Single',
+          'מספר': 'Number',
+        };
+        const qType = qTypeMap[qTypeUI] || 'Text';
         const required = !!q?.required;
         let choice: string[] = [];
-        if (qType === 'בחירה מרובה' || qType === 'בחירה יחידה') {
+        if (qType === 'Multiple' || qType === 'Single') {
           const arr = Array.isArray(q?.choice) ? q.choice : [];
           choice = arr.map((c: any) => String(c ?? '').trim()).filter(Boolean);
         }
         return { q: qText, qType, required, choice } as any;
       });
-      await createQuestionsCol(trimmed, payloadQuestions);
+      await createQuestionsCol(trimmed, payloadQuestions, description.trim() || undefined);
+      // On successful creation, clear any locally saved questions
+      try {
+        window.localStorage.removeItem(LS_KEY);
+      } catch (e) {
+        // ignore localStorage errors
+      }
       onCreated();
       onClose();
     } catch (err: any) {
@@ -115,8 +150,9 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
 
     // Normalize selectedIndex persistence rules
     const normalized: any = { ...newQ };
-    // Do not persist selected option for single-choice; remove if present
-    if ('selectedIndex' in normalized) delete normalized.selectedIndex;
+    // Do not persist UI-only/answer-like fields
+    if ('selectedIndex' in normalized) delete normalized.selectedIndex; // single-choice selection
+    if ('numberValue' in normalized) delete normalized.numberValue; // transient numeric input
 
     const updated =
       editingIndex !== null
@@ -153,8 +189,18 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
   return (
     <div className="popup-overlay">
       <div className="popup-content popup-content--square">
-        <h2>יצירת תבנית חדשה</h2>
-        <p className="popup-subtitle">צור תבנית חדשה עם שאלות ואפשרויות מענה</p>
+        <button
+          type="button"
+          className="popup-close-button"
+          aria-label="סגור"
+          onClick={onClose}
+        >
+          <ExitButton />
+        </button>
+        <div className="popup-header">
+          <h2>{isEdit ? 'עריכת תבנית קיימת' : 'יצירת תבנית חדשה'}</h2>
+          <p className="popup-subtitle">{isEdit ? 'ערוך תבנית' : 'צור תבנית חדשה עם שאלות ואפשרויות מענה'}</p>
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="colName" className="popup-label">כותרת התבנית</label>
@@ -163,9 +209,11 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onFocus={() => setNameActivated(true)}
               required
               placeholder="כותרת"
               showCheck={!!name.trim() && !nameError}
+              wrapperClassName={!isEdit && !nameActivated ? 'input-wrapper--muted' : undefined}
             />
             <AnimatedErrorMessage message={nameError} />
           </div>
@@ -177,9 +225,11 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              onFocus={() => setDescActivated(true)}
               placeholder="תיאור"
+              wrapperClassName={!isEdit && !descActivated ? 'input-wrapper--muted' : undefined}
             />
-            <div className="popup-warning">שדה זה לא נשמר כרגע</div>
+            
           </div>
 
           <div className="popup-section-header">
@@ -251,7 +301,7 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
           {submitError && <div className="error-message show">{submitError}</div>}
           <div className="form-actions">
             <button type="submit" className="button-primary" disabled={loading || !!nameError || !name.trim()}>
-              {loading ? 'יוצר…' : 'צור תבנית'}
+              {loading ? (isEdit ? 'שומר…' : 'יוצר…') : (isEdit ? 'שמור שינויים' : 'צור תבנית')}
             </button>
             <button type="button" className="button-secondary button-cancel" onClick={onClose} disabled={loading}>
               ביטול

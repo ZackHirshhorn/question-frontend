@@ -6,11 +6,12 @@ import CreateSubCategoryPopup from './CreateSubCategoryPopup';
 import CreateCategoryPopup from './CreateCategoryPopup';
 import CreateTopicPopup from './CreateTopicPopup';
 import RenameCategoryPopup from './RenameCategoryPopup';
-import ConfirmDeletePopup from './ConfirmDeletePopup';
+import UndoBanner from './UndoBanner';
 import TemplateHeader from './TemplateHeader';
 import CategoryTree from './CategoryTree';
 import type { UICategory, UISubCategory, UITemplate, UITopic } from '../types/template';
 import { genUiId, withIds, toServerShape } from '../utils/templateTransforms';
+import { useUndoableDelete } from '../hooks/useUndoableDelete';
 
 type SubCategory = UISubCategory;
 type Category = UICategory;
@@ -29,13 +30,12 @@ const TemplateView: React.FC<TemplateViewProps> = ({ onBack }) => {
   const [isSubCategoryPopupOpen, setSubCategoryPopupOpen] = useState(false);
   const [isCategoryPopupOpen, setCategoryPopupOpen] = useState(false);
   const [isRenamePopupOpen, setRenamePopupOpen] = useState(false);
-  const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
   const [isTopicPopupOpen, setTopicPopupOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategory | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const [deletePopupMessage, setDeletePopupMessage] = useState<string>('');
+  const { pending, trigger, undo } = useUndoableDelete<Template>();
 
   // Transforms moved to utils/templateTransforms.ts
 
@@ -85,20 +85,48 @@ const TemplateView: React.FC<TemplateViewProps> = ({ onBack }) => {
   };
 
   const handleDeleteClick = (category: Category) => {
-    // If this category is currently expanded, collapse it when initiating delete.
+    if (!template || !templateId) return;
     if (expandedCategory === category.id) {
       setExpandedCategory(null);
     }
-    setSelectedCategory(category);
-    setDeletePopupMessage('למחוק את הקטגוריה?');
-    setDeletePopupOpen(true);
+    const snapshot = template;
+    const updatedCategories = template.categories.filter(
+      (cat) => cat.name !== category.name
+    );
+    const updatedTemplate = { ...template, categories: updatedCategories };
+    trigger({
+      label: `נמחק: '${category.name}'`,
+      snapshot,
+      applyOptimistic: () => setTemplate(updatedTemplate),
+      commit: async () => {
+        await updateTemplate(templateId, toServerShape(updatedTemplate));
+      },
+      restore: (snap) => setTemplate(snap),
+    });
   };
 
   const handleDeleteSubCategoryClick = (subCategory: SubCategory, category: Category) => {
-    setSelectedSubCategory(subCategory);
-    setSelectedCategory(category);
-    setDeletePopupMessage('למחוק את תת-הקטגוריה?');
-    setDeletePopupOpen(true);
+    if (!template || !templateId) return;
+    const snapshot = template;
+    const updatedCategories = template.categories.map((cat) => {
+      if (cat.name === category.name) {
+        return {
+          ...cat,
+          subCategories: (cat.subCategories || []).filter((sc) => sc.name !== subCategory.name),
+        };
+      }
+      return cat;
+    });
+    const updatedTemplate = { ...template, categories: updatedCategories };
+    trigger({
+      label: `נמחק: '${subCategory.name}'`,
+      snapshot,
+      applyOptimistic: () => setTemplate(updatedTemplate),
+      commit: async () => {
+        await updateTemplate(templateId, toServerShape(updatedTemplate));
+      },
+      restore: (snap) => setTemplate(snap),
+    });
   };
 
   const handleRenameTopicClick = (topicName: string, category: Category, subCategoryName: string) => {
@@ -111,20 +139,38 @@ const TemplateView: React.FC<TemplateViewProps> = ({ onBack }) => {
   };
 
   const handleDeleteTopicClick = (topicName: string, category: Category, subCategoryName: string) => {
-    const subCat = category.subCategories.find(sc => sc.name === subCategoryName) || null;
-    const topic = subCat?.topics?.find(t => t.name === topicName) || null;
-    setSelectedCategory(category);
-    setSelectedSubCategory(subCat);
-    setSelectedTopic(topic);
-    setDeletePopupMessage('למחוק את הנושא?');
-    setDeletePopupOpen(true);
+    if (!template || !templateId) return;
+    const snapshot = template;
+    const updatedCategories = template.categories.map((cat) => {
+      if (cat.name === category.name) {
+        return {
+          ...cat,
+          subCategories: (cat.subCategories || []).map((sc) => {
+            if (sc.name === subCategoryName) {
+              return { ...sc, topics: (sc.topics || []).filter((t) => t.name !== topicName) };
+            }
+            return sc;
+          }),
+        };
+      }
+      return cat;
+    });
+    const updatedTemplate = { ...template, categories: updatedCategories };
+    trigger({
+      label: `נמחק: '${topicName}'`,
+      snapshot,
+      applyOptimistic: () => setTemplate(updatedTemplate),
+      commit: async () => {
+        await updateTemplate(templateId, toServerShape(updatedTemplate));
+      },
+      restore: (snap) => setTemplate(snap),
+    });
   };
 
   const handleClosePopups = () => {
     setSubCategoryPopupOpen(false);
     setCategoryPopupOpen(false);
     setRenamePopupOpen(false);
-    setDeletePopupOpen(false);
     setTopicPopupOpen(false);
     setSelectedCategory(null);
     setSelectedSubCategory(null);
@@ -315,63 +361,7 @@ const TemplateView: React.FC<TemplateViewProps> = ({ onBack }) => {
     handleClosePopups();
   };
 
-  const handleConfirmDelete = async () => {
-    if (!template || !templateId) return;
-
-    let updatedCategories;
-
-    if (selectedTopic && selectedSubCategory && selectedCategory) {
-      // Delete topic
-      updatedCategories = template.categories.map(cat => {
-        if (cat.name === selectedCategory.name) {
-          return {
-            ...cat,
-            subCategories: cat.subCategories.map(subCat => {
-              if (subCat.name === selectedSubCategory.name) {
-                return {
-                  ...subCat,
-                  topics: (subCat.topics || []).filter(t => t.name !== selectedTopic.name),
-                };
-              }
-              return subCat;
-            }),
-          };
-        }
-        return cat;
-      });
-    } else if (selectedSubCategory && selectedCategory) {
-      // Delete subcategory
-      updatedCategories = template.categories.map(cat => {
-        if (cat.name === selectedCategory.name) {
-          return {
-            ...cat,
-            subCategories: cat.subCategories.filter(
-              subCat => subCat.name !== selectedSubCategory.name
-            ),
-          };
-        }
-        return cat;
-      });
-    } else if (selectedCategory) {
-      // Delete category
-      updatedCategories = template.categories.filter(
-        cat => cat.name !== selectedCategory.name
-      );
-    } else {
-      return;
-    }
-
-    const updatedTemplate = { ...template, categories: updatedCategories };
-
-    try {
-      await updateTemplate(templateId, toServerShape(updatedTemplate));
-      setTemplate(updatedTemplate);
-      handleClosePopups();
-    } catch (err) {
-      setError('Failed to update template.');
-      console.error(err);
-    }
-  };
+  // confirm delete flow replaced by optimistic delete with undo
 
   if (loading) {
     return <Loading />;
@@ -390,7 +380,9 @@ const TemplateView: React.FC<TemplateViewProps> = ({ onBack }) => {
   return (
     <div>
       <TemplateHeader name={template.name} onNewCategory={() => setCategoryPopupOpen(true)} />
-      <CategoryTree
+      <div style={{ position: 'relative', paddingTop: pending ? '52px' : 0 }}>
+        {pending && <UndoBanner label={pending.label} onUndo={undo} />}
+        <CategoryTree
         categories={sortedCategories}
         expandedCategoryId={expandedCategory}
         onToggleCategory={handleCategoryClick}
@@ -403,7 +395,8 @@ const TemplateView: React.FC<TemplateViewProps> = ({ onBack }) => {
         onTopicRenameClick={handleRenameTopicClick}
         onTopicDeleteClick={handleDeleteTopicClick}
         onTopicPlusQuestionClick={(...args) => console.log('Add question to topic', ...args)}
-      />
+        />
+      </div>
       {isSubCategoryPopupOpen && selectedCategory && (
         <CreateSubCategoryPopup
           categoryName={selectedCategory.name}
@@ -442,13 +435,7 @@ const TemplateView: React.FC<TemplateViewProps> = ({ onBack }) => {
           existingTopicNames={(selectedSubCategory.topics || []).map(t => t.name)}
         />
       )}
-      {isDeletePopupOpen && (
-        <ConfirmDeletePopup
-          message={deletePopupMessage}
-          onClose={handleClosePopups}
-          onConfirm={handleConfirmDelete}
-        />
-      )}
+      {/* Delete confirmation replaced by undo banner behavior */}
     </div>
   );
 };

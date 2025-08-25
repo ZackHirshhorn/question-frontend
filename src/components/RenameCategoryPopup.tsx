@@ -33,8 +33,6 @@ const RenameCategoryPopup: React.FC<RenameCategoryPopupProps> = ({ currentName, 
     event.preventDefault();
     if (canSave) {
       onSave(trimmed);
-    } else {
-      onClose(); // Close if the name is unchanged or empty
     }
   };
 

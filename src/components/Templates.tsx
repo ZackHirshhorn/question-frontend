@@ -6,6 +6,8 @@ import './CreateTemplate.css';
 import Loading from './Loading';
 import TemplateListItem from './TemplateListItem';
 import { useSorter } from './Sorter';
+import UndoBanner from './UndoBanner';
+import { useUndoableDelete } from '../hooks/useUndoableDelete';
 
 interface Template {
   id: string;
@@ -24,6 +26,7 @@ const Templates: React.FC<TemplatesProps> = ({ onTemplateClick }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isPopupOpen, setPopupOpen] = useState(false);
+  const { pending, trigger, undo } = useUndoableDelete<Template[]>();
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -42,16 +45,26 @@ const Templates: React.FC<TemplatesProps> = ({ onTemplateClick }) => {
     fetchTemplates();
   }, []);
 
-  const handleDelete = async (templateId: string) => {
-    try {
-      await deleteTemplate(templateId);
-      setTemplates((prevTemplates) =>
-        prevTemplates.filter((template) => template.id !== templateId),
-      );
-    } catch (err) {
-      console.error('Failed to delete template:', err);
-      setError('Failed to delete template. Please try again later.');
-    }
+  const handleDelete = (templateId: string) => {
+    const templateToDelete = templates.find((t) => t.id === templateId);
+    if (!templateToDelete) return;
+    const snapshot = templates;
+    const updated = templates.filter((t) => t.id !== templateId);
+    trigger({
+      label: `נמחק: '${templateToDelete.name}'`,
+      snapshot,
+      applyOptimistic: () => setTemplates(updated),
+      commit: async () => {
+        try {
+          await deleteTemplate(templateId);
+        } catch (err) {
+          console.error('Failed to delete template:', err);
+          setError('Failed to delete template. Please try again later.');
+          throw err;
+        }
+      },
+      restore: (snap) => setTemplates(snap),
+    });
   };
 
   const handleAddNew = () => {
@@ -118,17 +131,22 @@ const Templates: React.FC<TemplatesProps> = ({ onTemplateClick }) => {
         </button>
         <Controls />
       </div>
-      <GenericList
-        items={sortedItems}
-        keyExtractor={(item) => item.id}
-        renderItem={(item) => (
-          <TemplateListItem
-            content={item.name}
-            onClick={() => onTemplateClick(item.id)}
-            onDeleteClick={() => handleDelete(item.id)}
-          />
+      <div style={{ position: 'relative', paddingTop: pending ? '52px' : 0 }}>
+        {pending && (
+          <UndoBanner label={pending.label} onUndo={undo} />
         )}
-      />
+        <GenericList
+          items={sortedItems}
+          keyExtractor={(item) => item.id}
+          renderItem={(item) => (
+            <TemplateListItem
+              content={item.name}
+              onClick={() => onTemplateClick(item.id)}
+              onDeleteClick={() => handleDelete(item.id)}
+            />
+          )}
+        />
+      </div>
       {isPopupOpen && (
         <CreateTemplate
           onClose={handleClosePopup}
