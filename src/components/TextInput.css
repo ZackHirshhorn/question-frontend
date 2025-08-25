@@ -24,6 +24,8 @@
   text-align: right;
 }
 
-.input-wrapper input:focus {
-  background-color: #E6EAFF;
+/* Left-to-right URL display variant for read-only link fields */
+.input-wrapper .ltr-url-input {
+  direction: ltr;
+  text-align: left;
 }

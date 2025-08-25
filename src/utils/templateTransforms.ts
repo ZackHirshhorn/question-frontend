@@ -1,5 +1,11 @@
 import type { UITemplate } from '../types/template';
 
+// Server template as returned by API: questions are arrays of string IDs
+type ServerTopic = { name?: string; questions?: string[] };
+type ServerSubCategory = { name?: string; questions?: string[]; topics?: ServerTopic[] };
+type ServerCategory = { name?: string; questions?: string[]; subCategories?: ServerSubCategory[] };
+type ServerTemplate = { name?: string; categories?: ServerCategory[] };
+
 /**
  * UI ID generator used only on the client to provide stable identity for
  * React list keys and expansion state. These IDs are session-local and are
@@ -14,43 +20,21 @@ export function genUiId() {
  * with generated IDs so components can use stable keys and preserve open/close
  * state across rename or other non-destructive updates.
  */
-export function withIds(server: any): UITemplate {
+export function withIds(server: ServerTemplate): UITemplate {
   return {
-    name: server?.name,
-    categories: (server?.categories || []).map((cat: any) => ({
+    name: server?.name || '',
+    categories: (server?.categories || []).map((cat) => ({
       id: genUiId(),
-      name: cat?.name,
-      questions: cat?.questions || [],
-      subCategories: (cat?.subCategories || []).map((sc: any) => ({
+      name: cat?.name || '',
+      questions: Array.isArray(cat?.questions) ? cat!.questions! : [],
+      subCategories: (cat?.subCategories || []).map((sc) => ({
         id: genUiId(),
-        name: sc?.name,
-        questions: sc?.questions || [],
-        topics: (sc?.topics || []).map((tp: any) => ({
+        name: sc?.name || '',
+        questions: Array.isArray(sc?.questions) ? sc!.questions! : [],
+        topics: (sc?.topics || []).map((tp) => ({
           id: genUiId(),
-          name: tp?.name,
-          questions: tp?.questions || [],
-        })),
-      })),
-    })),
-  };
-}
-
-/**
- * Strips UI-only IDs from a UI template and returns an object matching the
- * server API contract. Always use this before calling update APIs.
- */
-export function toServerShape(ui: UITemplate) {
-  return {
-    name: ui.name,
-    categories: ui.categories.map((cat) => ({
-      name: cat.name,
-      questions: cat.questions || [],
-      subCategories: (cat.subCategories || []).map((sc) => ({
-        name: sc.name,
-        questions: sc.questions || [],
-        topics: (sc.topics || []).map((tp) => ({
-          name: tp.name,
-          questions: tp.questions || [],
+          name: tp?.name || '',
+          questions: Array.isArray(tp?.questions) ? tp!.questions! : [],
         })),
       })),
     })),

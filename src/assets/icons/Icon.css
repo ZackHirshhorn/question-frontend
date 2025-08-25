@@ -17,10 +17,23 @@
   background-color: rgba(0, 0, 0, 0.3); /* 30% transparent black overlay */
 }
 
+.icon-wrapper:focus-visible {
+  outline: 2px solid #0957D0;
+  outline-offset: 2px;
+  background-color: rgba(9, 87, 208, 0.15);
+}
+
 .icon-container {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
+  line-height: 0; /* avoid baseline clipping of inline SVGs */
+  overflow: visible; /* ensure icon is not visually clipped */
+}
+
+/* Ensure SVGs don't reserve baseline descender space that can look like cropping */
+.icon-container svg {
+  display: block;
 }

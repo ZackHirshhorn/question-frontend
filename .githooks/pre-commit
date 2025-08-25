@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+# Git pre-commit hook to run lint and tests for frontend-question
+# To enable: git config core.hooksPath frontend-question/.githooks
+
+echo "[pre-commit] Running ESLint..."
+npm run -s --prefix "$(dirname "$0")/.." lint
+ESLINT_STATUS=$?
+if [ $ESLINT_STATUS -ne 0 ]; then
+  echo "[pre-commit] ESLint failed. Aborting commit."
+  exit $ESLINT_STATUS
+fi
+
+echo "[pre-commit] Running tests (vitest --run)..."
+npm run -s --prefix "$(dirname "$0")/.." test:ci
+TEST_STATUS=$?
+if [ $TEST_STATUS -ne 0 ]; then
+  echo "[pre-commit] Tests failed. Aborting commit."
+  exit $TEST_STATUS
+fi
+
+echo "[pre-commit] All checks passed. Proceeding with commit."
+exit 0
+
