@@ -42,9 +42,9 @@ const TopMenu: React.FC<TopMenuProps> = ({ isLoggedIn, onLogin, onLogout }) => {
       top: '50px',
       right: '10px',
       backgroundColor: 'white',
-      border: '1px solid #ccc',
+      border: 'none',
       borderRadius: '4px',
-      boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+      boxShadow: '0px 1px 2px 0px #0000004D',
       zIndex: 1000,
     }}>
       <ul style={{ listStyle: 'none', margin: 0, padding: '10px 0' }}>
