@@ -1,16 +1,21 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import CreateSubCategoryPopup from './CreateSubCategoryPopup';
+import CreateNamesPopup from './CreateNamesPopup';
 
-describe('CreateSubCategoryPopup', () => {
+describe('CreateSubCategoryPopup (via CreateNamesPopup)', () => {
   it('disables save on duplicate and shows error', () => {
     const onClose = vi.fn();
     const onCreate = vi.fn();
     render(
-      <CreateSubCategoryPopup
-        categoryName="Cat"
+      <CreateNamesPopup
+        title={`הוספת תת קטגוריה חדשה עבור Cat`}
+        fieldLabel="שם תת הקטגוריה"
+        addButtonText="הוסף עוד"
+        primaryButtonText="שמור"
+        savingText="שומר…"
+        duplicateErrorText="תת-קטגוריה עם שם זה כבר קיימת."
+        existingNames={['Exist']}
         onClose={onClose}
         onCreate={onCreate}
-        existingSubCategoryNames={['Exist']}
       />
     );
 
@@ -25,11 +30,16 @@ describe('CreateSubCategoryPopup', () => {
     const onClose = vi.fn();
     const onCreate = vi.fn();
     render(
-      <CreateSubCategoryPopup
-        categoryName="Cat"
+      <CreateNamesPopup
+        title={`הוספת תת קטגוריה חדשה עבור Cat`}
+        fieldLabel="שם תת הקטגוריה"
+        addButtonText="הוסף עוד"
+        primaryButtonText="שמור"
+        savingText="שומר…"
+        duplicateErrorText="תת-קטגוריה עם שם זה כבר קיימת."
+        existingNames={[]}
         onClose={onClose}
         onCreate={onCreate}
-        existingSubCategoryNames={[]}
       />
     );
     const addButton = screen.getByRole('button', { name: 'הוסף עוד' });

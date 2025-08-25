@@ -9,33 +9,61 @@ import AddQuestionForm from './AddQuestionForm';
 import TrashIcon from '../assets/icons/TrashIcon';
 import EditIcon from '../assets/icons/EditIcon';
 import ConfirmDeletePopup from './ConfirmDeletePopup';
+import ExitButton from '../assets/icons/ExitButton';
+import SpinnerIcon from '../assets/icons/SpinnerIcon';
 
 interface CreateQuestionsColProps {
   onClose: () => void;
   onCreated: () => void;
   existingNames: string[];
+  initial?: {
+    name?: string;
+    description?: string;
+    questions?: ColQuestion[];
+  };
 }
 
-const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCreated, existingNames }) => {
-  const [name, setName] = useState('');
+type ColQuestion = {
+  q?: string;
+  qType?: string;
+  required?: boolean;
+  choice?: unknown[];
+  selectedIndex?: number | null;
+  numberValue?: number;
+};
+
+const CreateQuestionsColPopup: React.FC<CreateQuestionsColProps> = ({ onClose, onCreated, existingNames, initial }) => {
+  const isEdit = !!initial;
+  const [name, setName] = useState(initial?.name || '');
   const [nameError, setNameError] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(initial?.description || '');
   // Committed questions that exist in the persisted set
-  const [questions, setQuestions] = useState<any[]>([
+  const [questions, setQuestions] = useState<ColQuestion[]>(initial?.questions || [
     // Used to test the display when there are questions in the set:
     // { q: 'שאלה לדוגמה', qType: 'text', required: false },
   ]);
   // Local drafts (do not affect the empty state or green check until saved)
-  const [draftQuestions, setDraftQuestions] = useState<any[]>([]);
+  const [draftQuestions, setDraftQuestions] = useState<ColQuestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [confirmDeleteIndex, setConfirmDeleteIndex] = useState<number | null>(null);
+  const [nameActivated, setNameActivated] = useState(false);
+  const [descActivated, setDescActivated] = useState(false);
 
   const LS_KEY = 'create_questions_col_saved_questions';
 
-  // Load saved questions from localStorage on mount
+  // Initialize/refresh when `initial` changes
   useEffect(() => {
+    if (initial) {
+      setName(initial.name || '');
+      setDescription(initial.description || '');
+      setQuestions(Array.isArray(initial.questions) ? initial.questions : []);
+      return; // when editing existing, skip localStorage hydration
+    }
+    // Load saved questions from localStorage on mount when creating new
+    setName('');
+    setDescription('');
     try {
       const raw = window.localStorage.getItem(LS_KEY);
       if (raw) {
@@ -43,22 +71,25 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
         if (Array.isArray(parsed)) {
           setQuestions(parsed);
         }
+        return;
       }
-    } catch (e) {
+    } catch {
       // ignore localStorage errors
     }
-  }, []);
+    setQuestions([]);
+  }, [initial]);
 
   useEffect(() => {
     const trimmed = name.trim();
-    if (trimmed.length > 0 && existingNames.includes(trimmed)) {
+    const isDuplicate = existingNames.includes(trimmed) && (!initial || trimmed !== (initial.name || '').trim());
+    if (trimmed.length > 0 && isDuplicate) {
       setNameError('שם התבנית כבר קיים');
     } else if (trimmed.length > 0 && trimmed.length < 2) {
       setNameError('שם התבנית קצר מדי');
     } else {
       setNameError('');
     }
-  }, [name, existingNames]);
+  }, [name, existingNames, initial]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,20 +106,34 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
       // Normalize questions for server
       const payloadQuestions = questions.map((q) => {
         const qText = String(q?.q ?? '').trim();
-        const qType = q?.qType ?? 'טקסט';
+        const qTypeUI = q?.qType ?? 'טקסט';
+        // Map UI labels to backend enum values
+        const qTypeMap: Record<string, 'Text' | 'Multiple' | 'Single' | 'Number'> = {
+          'טקסט': 'Text',
+          'בחירה מרובה': 'Multiple',
+          'בחירה יחידה': 'Single',
+          'מספר': 'Number',
+        };
+        const qType = qTypeMap[qTypeUI] || 'Text';
         const required = !!q?.required;
         let choice: string[] = [];
-        if (qType === 'בחירה מרובה' || qType === 'בחירה יחידה') {
+        if (qType === 'Multiple' || qType === 'Single') {
           const arr = Array.isArray(q?.choice) ? q.choice : [];
-          choice = arr.map((c: any) => String(c ?? '').trim()).filter(Boolean);
+          choice = arr.map((c: unknown) => String(c ?? '').trim()).filter(Boolean);
         }
-        return { q: qText, qType, required, choice } as any;
+        return { q: qText, qType, required, choice } as { q: string; qType: 'Text' | 'Multiple' | 'Single' | 'Number'; required: boolean; choice: string[] };
       });
-      await createQuestionsCol(trimmed, payloadQuestions);
+      await createQuestionsCol(trimmed, payloadQuestions, description.trim() || undefined);
+      // On successful creation, clear any locally saved questions
+      try {
+        window.localStorage.removeItem(LS_KEY);
+      } catch {
+        // ignore localStorage errors
+      }
       onCreated();
       onClose();
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || 'אירעה שגיאה ביצירת התבנית';
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: unknown } } })?.response?.data?.message || 'אירעה שגיאה ביצירת התבנית';
       setSubmitError(Array.isArray(msg) ? msg.join(', ') : String(msg));
     } finally {
       setLoading(false);
@@ -113,10 +158,19 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
     const title = String(newQ.q ?? '').trim();
     if (!title) return; // prevent saving when question name is empty
 
+    // Prevent duplicates by question text (trimmed)
+    const existingNames = questions.map((q) => String(q?.q ?? '').trim()).filter(Boolean);
+    const original = editingIndex !== null ? String(questions[editingIndex]?.q || '').trim() : null;
+    const isDuplicate = existingNames.includes(title) && (!original || title !== original);
+    if (isDuplicate) {
+      return; // logical guard; UI also disables save
+    }
+
     // Normalize selectedIndex persistence rules
-    const normalized: any = { ...newQ };
-    // Do not persist selected option for single-choice; remove if present
-    if ('selectedIndex' in normalized) delete normalized.selectedIndex;
+    const normalized: ColQuestion = { ...newQ };
+    // Do not persist UI-only/answer-like fields
+    if ('selectedIndex' in normalized) delete normalized.selectedIndex; // single-choice selection
+    if ('numberValue' in normalized) delete normalized.numberValue; // transient numeric input
 
     const updated =
       editingIndex !== null
@@ -127,7 +181,7 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
     setEditingIndex(null);
     try {
       window.localStorage.setItem(LS_KEY, JSON.stringify(updated));
-    } catch (e) {
+    } catch {
       // ignore localStorage errors
     }
   };
@@ -137,7 +191,7 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
       const updated = prev.filter((_, i) => i !== index);
       try {
         window.localStorage.setItem(LS_KEY, JSON.stringify(updated));
-      } catch (e) {
+      } catch {
         // ignore localStorage errors
       }
       return updated;
@@ -153,8 +207,18 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
   return (
     <div className="popup-overlay">
       <div className="popup-content popup-content--square">
-        <h2>יצירת תבנית חדשה</h2>
-        <p className="popup-subtitle">צור תבנית חדשה עם שאלות ואפשרויות מענה</p>
+        <button
+          type="button"
+          className="popup-close-button"
+          aria-label="סגור"
+          onClick={onClose}
+        >
+          <ExitButton />
+        </button>
+        <div className="popup-header">
+          <h2>{isEdit ? 'עריכת תבנית קיימת' : 'יצירת תבנית חדשה'}</h2>
+          <p className="popup-subtitle">{isEdit ? 'ערוך תבנית' : 'צור תבנית חדשה עם שאלות ואפשרויות מענה'}</p>
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="colName" className="popup-label">כותרת התבנית</label>
@@ -163,9 +227,11 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onFocus={() => setNameActivated(true)}
               required
               placeholder="כותרת"
               showCheck={!!name.trim() && !nameError}
+              wrapperClassName={!isEdit && !nameActivated ? 'input-wrapper--muted' : undefined}
             />
             <AnimatedErrorMessage message={nameError} />
           </div>
@@ -177,9 +243,11 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              onFocus={() => setDescActivated(true)}
               placeholder="תיאור"
+              wrapperClassName={!isEdit && !descActivated ? 'input-wrapper--muted' : undefined}
             />
-            <div className="popup-warning">שדה זה לא נשמר כרגע</div>
+            
           </div>
 
           <div className="popup-section-header">
@@ -243,6 +311,8 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
               onChange={(next) => setDraftQuestions((prev) => { const copy = [...prev]; copy[0] = next; return copy; })}
               onSave={handleSaveDraft}
               onCancel={handleCancelDraft}
+              existingNames={questions.map((q) => String(q?.q ?? '').trim()).filter(Boolean)}
+              editingOriginalName={editingIndex !== null ? String(questions[editingIndex]?.q || '').trim() : undefined}
             />
           ) : (
             <div className="popup-divider" />
@@ -250,8 +320,11 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
 
           {submitError && <div className="error-message show">{submitError}</div>}
           <div className="form-actions">
-            <button type="submit" className="button-primary" disabled={loading || !!nameError || !name.trim()}>
-              {loading ? 'יוצר…' : 'צור תבנית'}
+            <button type="submit" className="button-primary" disabled={loading || !!nameError || !name.trim()} aria-busy={loading}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+            >
+              {loading && <SpinnerIcon />}
+              {loading ? (isEdit ? 'שומר…' : 'יוצר…') : (isEdit ? 'שמור שינויים' : 'צור תבנית')}
             </button>
             <button type="button" className="button-secondary button-cancel" onClick={onClose} disabled={loading}>
               ביטול
@@ -260,7 +333,7 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
         </form>
         {confirmDeleteIndex !== null && (
           <ConfirmDeletePopup
-            message="בטוח למחוק?"
+            message={`למחוק '${questions[confirmDeleteIndex]?.q || ''}'?`}
             onClose={() => setConfirmDeleteIndex(null)}
             onConfirm={() => {
               if (confirmDeleteIndex !== null) {
@@ -275,4 +348,4 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
   );
 };
 
-export default CreateQuestionsCol;
+export default CreateQuestionsColPopup;

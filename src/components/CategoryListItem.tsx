@@ -1,3 +1,9 @@
+/**
+ * CategoryListItem renders a single category row with actions.
+ *
+ * Visual-only component: delegates all behavior through callbacks.
+ * Used by CategoryTree.
+ */
 import React from 'react';
 import GenericListItem from './GenericListItem';
 import EditIcon from '../assets/icons/EditIcon';
@@ -8,6 +14,15 @@ import TriangleIcon from '../assets/icons/TriangleIcon';
 import '../assets/icons/Icon.css';
 import Tooltip from './Tooltip';
 
+/**
+ * Props for CategoryListItem
+ * - content: display text for the category name
+ * - isExpanded: whether the category's children are expanded
+ * - onClick: toggles expansion (handled by parent)
+ * - onRenameClick/onDeleteClick: action icons for rename/delete
+ * - onPlusQuestionClick: fired when user clicks "הוספת שאלה"
+ * - onNewClick: create a new subcategory under this category
+ */
 interface CategoryListItemProps {
   content: string;
   isExpanded: boolean;
@@ -18,20 +33,25 @@ interface CategoryListItemProps {
   onNewClick: () => void;
 }
 
-const IconWrapper = ({ tooltipText, onClick, children }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-  return (
-    <div
-      className="icon-wrapper"
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {children}
-      <Tooltip text={tooltipText} visible={isHovered} />
-    </div>
-  );
-};
+/** Lightweight wrapper that shows a tooltip on hover for an icon */
+const IconWrapper: React.FC<{ tooltipText: string; onClick?: () => void; children: React.ReactNode }>
+  = ({ tooltipText, onClick, children }) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+    return (
+      <button
+        type="button"
+        className="icon-wrapper"
+        aria-label={tooltipText}
+        onClick={(e) => { e.stopPropagation(); if (onClick) onClick(); }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+      >
+        {children}
+        <Tooltip text={tooltipText} visible={isHovered} />
+      </button>
+    );
+  };
 
 const CategoryListItem: React.FC<CategoryListItemProps> = ({
   content,
@@ -93,4 +113,3 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({
 };
 
 export default CategoryListItem;
-

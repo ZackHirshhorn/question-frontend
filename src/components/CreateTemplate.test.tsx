@@ -1,7 +1,7 @@
 import { render, fireEvent, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-import CreateTemplate from './CreateTemplate';
+import CreateTemplate from './CreateTemplatePopup';
 
 describe('CreateTemplate', () => {
   it('should display an error message when trying to create a template with duplicate category names', () => {

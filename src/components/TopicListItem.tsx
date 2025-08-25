@@ -1,3 +1,7 @@
+/**
+ * TopicListItem renders a topic row with action icons.
+ * Presentation-only; behaviors are passed in via props.
+ */
 import React from 'react';
 import GenericListItem from './GenericListItem';
 import EditIcon from '../assets/icons/EditIcon';
@@ -6,6 +10,13 @@ import PlusWithQuestionIcon from '../assets/icons/PlusWithQuestionIcon';
 import '../assets/icons/Icon.css';
 import Tooltip from './Tooltip';
 
+/**
+ * Props for TopicListItem
+ * - content: topic name
+ * - onClick: optional click handler
+ * - onRenameClick/onDeleteClick: action icons
+ * - onPlusQuestionClick: fired on "הוספת שאלה"
+ */
 interface TopicListItemProps {
   content: string;
   onClick?: () => void;
@@ -14,20 +25,25 @@ interface TopicListItemProps {
   onPlusQuestionClick?: () => void;
 }
 
-const IconWrapper = ({ tooltipText, onClick, children }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
-  return (
-    <div
-      className="icon-wrapper"
-      onClick={(e) => { e.stopPropagation(); onClick && onClick(); }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {children}
-      <Tooltip text={tooltipText} visible={isHovered} />
-    </div>
-  );
-};
+/** Tooltip-enabled wrapper for clickable icons */
+const IconWrapper: React.FC<{ tooltipText: string; onClick?: () => void; children: React.ReactNode }>
+  = ({ tooltipText, onClick, children }) => {
+    const [isHovered, setIsHovered] = React.useState(false);
+    return (
+      <button
+        type="button"
+        className="icon-wrapper"
+        aria-label={tooltipText}
+        onClick={(e) => { e.stopPropagation(); if (onClick) onClick(); }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+      >
+        {children}
+        <Tooltip text={tooltipText} visible={isHovered} />
+      </button>
+    );
+  };
 
 const TopicListItem: React.FC<TopicListItemProps> = ({
   content,

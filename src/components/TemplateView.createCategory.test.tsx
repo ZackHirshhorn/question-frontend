@@ -13,8 +13,8 @@ describe('TemplateView create category', () => {
   it('calls updateTemplate when creating a new category', async () => {
     vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({
       data: { name: 'Temp', categories: [] },
-    } as any);
-    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
+    } as unknown as ReturnType<typeof templateApi.getTemplate>);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as unknown as ReturnType<typeof templateApi.updateTemplate>);
 
     render(<TemplateView onBack={() => {}} />);
 
@@ -26,8 +26,8 @@ describe('TemplateView create category', () => {
     fireEvent.click(screen.getByRole('button', { name: 'יצירה' }));
 
     await waitFor(() => expect(updateSpy).toHaveBeenCalled());
-    const [id, payload] = updateSpy.mock.calls[0];
+    const [id, payload] = updateSpy.mock.calls[0] as [string, { categories: Array<{ name: string }> }];
     expect(id).toBe('123');
-    expect(payload.categories.some((c: any) => c.name === 'NewCat')).toBe(true);
+    expect(payload.categories.some((c) => c.name === 'NewCat')).toBe(true);
   });
 });

@@ -13,7 +13,7 @@ const QuestionNumber: React.FC<QuestionNumberProps> = ({ value, onChange }) => {
       <TextInput
         type="number"
         inputMode="numeric"
-        value={value as any as string}
+        value={value === undefined ? '' : String(value)}
         onChange={(e) => onChange(e.target.value)}
         placeholder="...הזן מספר"
       />
@@ -22,4 +22,3 @@ const QuestionNumber: React.FC<QuestionNumberProps> = ({ value, onChange }) => {
 };
 
 export default QuestionNumber;
-

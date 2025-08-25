@@ -1,4 +1,8 @@
 // src/components/SubCategoryList.tsx
+/**
+ * SubCategoryList renders a list of subcategories and, when expanded,
+ * their nested topics list. Delegates all actions to parent callbacks.
+ */
 import React, { useState } from 'react';
 import GenericList from './GenericList';
 import SubCategoryListItem from './SubCategoryListItem';

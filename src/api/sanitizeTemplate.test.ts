@@ -3,7 +3,23 @@ import { sanitizeTemplate } from './sanitizeTemplate';
 
 describe('sanitizeTemplate', () => {
   it('mutates template questions at all levels to _id strings', () => {
-    const template: any = {
+    type Q = { _id: string } | string;
+    type Tmpl = {
+      name: string;
+      categories: Array<{
+        name: string;
+        questions: Q[];
+        subCategories: Array<{
+          name: string;
+          questions: Q[];
+          topics: Array<{
+            name: string;
+            questions: Q[];
+          }>;
+        }>;
+      }>;
+    };
+    const template: Tmpl = {
       name: 'T',
       categories: [
         {
@@ -36,4 +52,3 @@ describe('sanitizeTemplate', () => {
     expect(template.categories[1].questions).toEqual([]);
   });
 });
-

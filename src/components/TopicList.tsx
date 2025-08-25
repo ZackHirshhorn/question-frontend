@@ -1,3 +1,7 @@
+/**
+ * TopicList renders a flat list of topics for a subcategory, with action
+ * callbacks for rename/delete and adding a question.
+ */
 import React from 'react';
 import GenericList from './GenericList';
 import TopicListItem from './TopicListItem';

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createTemplate } from '../api/template';
-import CheckIcon from '../assets/icons/CheckIcon';
 import AnimatedErrorMessage from './AnimatedErrorMessage';
 import TextInput from './TextInput';
+import SpinnerIcon from '../assets/icons/SpinnerIcon';
 
 interface CreateTemplateProps {
   onClose: () => void;
@@ -12,7 +12,7 @@ interface CreateTemplateProps {
 
 import './Button.css';
 
-const CreateTemplate: React.FC<CreateTemplateProps> = ({ onClose, onTemplateCreated, existingTemplateNames }) => {
+const CreateTemplatePopup: React.FC<CreateTemplateProps> = ({ onClose, onTemplateCreated, existingTemplateNames }) => {
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState('');
   const [categories, setCategories] = useState([{ name: '' }]);
@@ -128,7 +128,10 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onClose, onTemplateCrea
             <button type="button" className="button-secondary" onClick={onClose} disabled={loading}>
               ביטול
             </button>
-            <button type="submit" className="button-primary" disabled={isSubmitDisabled}>
+            <button type="submit" className="button-primary" disabled={isSubmitDisabled} aria-busy={loading}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+            >
+              {loading && <SpinnerIcon />}
               {loading ? 'בתהליך יצירה...' : 'יצירה'}
             </button>
           </div>
@@ -138,4 +141,4 @@ const CreateTemplate: React.FC<CreateTemplateProps> = ({ onClose, onTemplateCrea
   );
 };
 
-export default CreateTemplate;
+export default CreateTemplatePopup;

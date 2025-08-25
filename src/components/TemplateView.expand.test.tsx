@@ -22,7 +22,7 @@ vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({
       },
     ],
   },
-} as any);
+} as unknown as ReturnType<typeof templateApi.getTemplate>);
 
 describe('TemplateView expand/collapse', () => {
   it('shows topics only when subcategory is expanded', async () => {

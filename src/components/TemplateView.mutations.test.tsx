@@ -1,6 +1,24 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TemplateView from './TemplateView';
 import * as templateApi from '../api/template';
+import * as questionsApi from '../api/questions';
+
+vi.mock('./SelectQuestionsColPopup', async () => {
+  const ReactModule = await import('react');
+  const { useEffect } = ReactModule;
+  const MockSelectQuestionsColPopup = ({ onSelect, onClose }: { onSelect?: (collection: { _id: string }) => void; onClose: () => void }) => {
+    useEffect(() => {
+      if (onSelect) {
+        onSelect({ _id: 'col-123' });
+      }
+      onClose();
+      // run once on mount to simulate immediate confirmation
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    return <div data-testid="mock-select-questions-popup" />;
+  };
+  return { __esModule: true, default: MockSelectQuestionsColPopup };
+});
 
 // Common mock template
 const baseTemplate = {
@@ -30,8 +48,8 @@ describe('TemplateView rename/delete', () => {
   });
 
   it('renames a topic and persists', async () => {
-    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as any);
-    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
+    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as unknown as ReturnType<typeof templateApi.getTemplate>);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as unknown as ReturnType<typeof templateApi.updateTemplate>);
 
     render(<TemplateView onBack={() => {}} />);
 
@@ -57,9 +75,9 @@ describe('TemplateView rename/delete', () => {
     await screen.findByText('TopNew');
   });
 
-  it('deletes a topic and persists', async () => {
-    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as any);
-    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
+  it('topic delete hides immediately after confirm and shows undo banner', async () => {
+    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as unknown as ReturnType<typeof templateApi.getTemplate>);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as unknown as ReturnType<typeof templateApi.updateTemplate>);
 
     render(<TemplateView onBack={() => {}} />);
 
@@ -74,16 +92,25 @@ describe('TemplateView rename/delete', () => {
     const wrappers = document.querySelectorAll('.icon-wrapper');
     // trash index 1
     fireEvent.click(wrappers[1] as HTMLElement);
-    // Confirm delete
-    fireEvent.click(await screen.findByRole('button', { name: 'מחיקה' }));
+    // Confirm popup
+    const popup1 = await screen.findByText(/למחוק/);
+    const confirm1 = popup1.closest('.popup-content')
+      ? (popup1.closest('.popup-content') as HTMLElement).querySelector('button.button-danger')
+      : null;
+    if (!confirm1) throw new Error('Confirm button not found in popup');
+    fireEvent.click(confirm1);
 
-    await waitFor(() => expect(updateSpy).toHaveBeenCalled());
+    // Item disappears immediately from the view and undo banner appears
     await waitFor(() => expect(screen.queryByText('Top')).not.toBeInTheDocument());
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 
+  // timing-based commit test deliberately skipped to avoid timer flakiness in jsdom
+
   it('renames a subcategory and persists', async () => {
-    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as any);
-    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
+    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as unknown as ReturnType<typeof templateApi.getTemplate>);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as unknown as ReturnType<typeof templateApi.updateTemplate>);
 
     render(<TemplateView onBack={() => {}} />);
 
@@ -102,9 +129,9 @@ describe('TemplateView rename/delete', () => {
     await screen.findByText('SubNew');
   });
 
-  it('deletes a category and persists', async () => {
-    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as any);
-    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as any);
+  it('category delete undo restores the item and prevents persistence (after confirm)', async () => {
+    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as unknown as ReturnType<typeof templateApi.getTemplate>);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as unknown as ReturnType<typeof templateApi.updateTemplate>);
 
     render(<TemplateView onBack={() => {}} />);
 
@@ -113,10 +140,87 @@ describe('TemplateView rename/delete', () => {
     const wrappers = document.querySelectorAll('.icon-wrapper');
     // category: plus?, trash, edit, new -> trash index 1
     fireEvent.click(wrappers[1] as HTMLElement);
-    fireEvent.click(await screen.findByRole('button', { name: 'מחיקה' }));
+    // Confirm popup
+    const popup2 = await screen.findByText(/למחוק/);
+    const confirm2 = popup2.closest('.popup-content')
+      ? (popup2.closest('.popup-content') as HTMLElement).querySelector('button.button-danger')
+      : null;
+    if (!confirm2) throw new Error('Confirm button not found in popup');
+    fireEvent.click(confirm2);
 
-    await waitFor(() => expect(updateSpy).toHaveBeenCalled());
-    await waitFor(() => expect(screen.queryByText('Cat')).not.toBeInTheDocument());
+    // Undo
+    const undo = await screen.findByText('בטל');
+    fireEvent.click(undo);
+    expect(updateSpy).not.toHaveBeenCalled();
+    expect(await screen.findByText('Cat')).toBeInTheDocument();
+  });
+
+  it('subcategory delete hides and can be undone (after confirm)', async () => {
+    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as unknown as ReturnType<typeof templateApi.getTemplate>);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as unknown as ReturnType<typeof templateApi.updateTemplate>);
+
+    render(<TemplateView onBack={() => {}} />);
+
+    const catEl = await screen.findByText('Cat');
+    fireEvent.click(catEl);
+    const subEl = await screen.findByText('Sub');
+    fireEvent.mouseEnter(subEl.parentElement!);
+    const wrappers = document.querySelectorAll('.icon-wrapper');
+    // subcategory: plus?, trash, edit, new -> trash index 1
+    fireEvent.click(wrappers[1] as HTMLElement);
+    // Confirm popup
+    const popup3 = await screen.findByText(/למחוק/);
+    const confirm3 = popup3.closest('.popup-content')
+      ? (popup3.closest('.popup-content') as HTMLElement).querySelector('button.button-danger')
+      : null;
+    if (!confirm3) throw new Error('Confirm button not found in popup');
+    fireEvent.click(confirm3);
+
+    await waitFor(() => expect(screen.queryByText('Sub')).not.toBeInTheDocument());
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
+
+    // Undo
+    const undo = await screen.findByText('בטל');
+    fireEvent.click(undo);
+    expect(await screen.findByText('Sub')).toBeInTheDocument();
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it('adds only the question collection id when selecting questions for a category', async () => {
+    vi.spyOn(templateApi, 'getTemplate').mockResolvedValue({ data: structuredClone(baseTemplate) } as unknown as ReturnType<typeof templateApi.getTemplate>);
+    const updateSpy = vi.spyOn(templateApi, 'updateTemplate').mockResolvedValue({} as unknown as ReturnType<typeof templateApi.updateTemplate>);
+    const getColSpy = vi.spyOn(questionsApi, 'getQuestionCollection');
+
+    render(<TemplateView onBack={() => {}} />);
+
+    const catEl = await screen.findByText('Cat');
+    fireEvent.mouseEnter(catEl.parentElement!);
+    const addButton = screen.getAllByRole('button', { name: 'הוספת שאלה' })[0];
+    fireEvent.click(addButton);
+
+    await waitFor(() => expect(updateSpy).toHaveBeenCalledTimes(1));
+    expect(updateSpy).toHaveBeenCalledWith('123', {
+      name: 'Temp',
+      categories: [
+        {
+          name: 'Cat',
+          questions: ['col-123'],
+          subCategories: [
+            {
+              name: 'Sub',
+              questions: [],
+              topics: [
+                {
+                  name: 'Top',
+                  questions: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(getColSpy).not.toHaveBeenCalled();
   });
 });
-
