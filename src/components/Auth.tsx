@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login, register } from '../api/auth';
 import { loginSuccess } from '../store/userSlice';
@@ -13,6 +15,10 @@ const Auth: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const redirectTo = params.get('redirect') || '/';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,9 +29,12 @@ const Auth: React.FC = () => {
       const user = response.data;
       setSuccess('התחברות בוצעה בהצלחה');
       dispatch(loginSuccess({ user }));
-      window.location.href = '/';
-    } catch (err: any) {
-      const message = err.response?.data?.message || 'ההתחברות נכשלה. יש לבדוק את פרטי ההתחברות.';
+      // Navigate to the intended route (default '/')
+      navigate(redirectTo, { replace: true });
+    } catch (err: unknown) {
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message || 'ההתחברות נכשלה. יש לבדוק את פרטי ההתחברות.'
+        : 'ההתחברות נכשלה. יש לבדוק את פרטי ההתחברות.';
       setError(Array.isArray(message) ? message.join(', ') : message);
       console.error(err);
     }
@@ -44,8 +53,10 @@ const Auth: React.FC = () => {
       setSuccess('ההרשמה בוצעה בהצלחה! יש להתחבר.');
       console.log(response.data);
       setActiveTab('login');
-    } catch (err: any) {
-      const message = err.response?.data?.message || 'ההרשמה נכשלה. יש לנסות שוב.';
+    } catch (err: unknown) {
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message || 'ההרשמה נכשלה. יש לנסות שוב.'
+        : 'ההרשמה נכשלה. יש לנסות שוב.';
       setError(Array.isArray(message) ? message.join(', ') : message);
       console.error(err);
     }

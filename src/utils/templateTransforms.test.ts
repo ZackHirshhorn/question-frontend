@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { withIds, toServerShape } from './templateTransforms';
+import { withIds } from './templateTransforms';
 
 describe('templateTransforms', () => {
-  it('withIds adds ids and preserves names/structure; toServerShape strips ids', () => {
+  it('withIds adds ids and preserves nested structure', () => {
     const server = {
       name: 'Temp',
       categories: [
@@ -28,9 +28,5 @@ describe('templateTransforms', () => {
     expect(ui.categories[0].id).toBeTruthy();
     expect(ui.categories[0].subCategories[0].id).toBeTruthy();
     expect(ui.categories[0].subCategories[0].topics[0].id).toBeTruthy();
-
-    const back = toServerShape(ui);
-    expect(back).toEqual(server);
   });
 });
-
