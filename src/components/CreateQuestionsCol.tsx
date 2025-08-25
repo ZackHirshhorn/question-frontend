@@ -84,7 +84,13 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
         }
         return { q: qText, qType, required, choice } as any;
       });
-      await createQuestionsCol(trimmed, payloadQuestions);
+      await createQuestionsCol(trimmed, payloadQuestions, description.trim() || undefined);
+      // On successful creation, clear any locally saved questions
+      try {
+        window.localStorage.removeItem(LS_KEY);
+      } catch (e) {
+        // ignore localStorage errors
+      }
       onCreated();
       onClose();
     } catch (err: any) {
@@ -115,8 +121,9 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
 
     // Normalize selectedIndex persistence rules
     const normalized: any = { ...newQ };
-    // Do not persist selected option for single-choice; remove if present
-    if ('selectedIndex' in normalized) delete normalized.selectedIndex;
+    // Do not persist UI-only/answer-like fields
+    if ('selectedIndex' in normalized) delete normalized.selectedIndex; // single-choice selection
+    if ('numberValue' in normalized) delete normalized.numberValue; // transient numeric input
 
     const updated =
       editingIndex !== null
@@ -179,7 +186,7 @@ const CreateQuestionsCol: React.FC<CreateQuestionsColProps> = ({ onClose, onCrea
               onChange={(e) => setDescription(e.target.value)}
               placeholder="תיאור"
             />
-            <div className="popup-warning">שדה זה לא נשמר כרגע</div>
+            
           </div>
 
           <div className="popup-section-header">

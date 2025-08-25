@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import SearchIcon from '../assets/icons/SearchIcon';
 import PlusWhiteIcon from '../assets/icons/PlusWhiteIcon';
 import './Button.css';
+import './Questions.css';
 import { searchQuestionCollections } from '../api/questions';
 import CreateQuestionsCol from './CreateQuestionsCol';
 
-type QuestionCollection = { _id: string; name: string };
+type QuestionCollection = { _id: string; name: string; description?: string };
 
 const Questions: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -138,18 +139,10 @@ const Questions: React.FC = () => {
                   justifyContent: 'center',
                 }}
               >
-                <span
-                  style={{
-                    fontFamily: 'Inter, system-ui, Avenir, Helvetica, Arial, sans-serif',
-                    fontWeight: 700,
-                    fontSize: '20px',
-                    lineHeight: '100%',
-                    letterSpacing: '0',
-                    textAlign: 'right',
-                  }}
-                >
-                  {col.name}
-                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span className="questions-item-title">{col.name}</span>
+                  <span className="questions-item-desc">{col.description?.trim() || 'אין תיאור'}</span>
+                </div>
               </div>
             ))
           )}
