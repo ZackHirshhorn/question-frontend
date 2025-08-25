@@ -1,5 +1,6 @@
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
 import { store } from '../store';
 import Auth from './Auth';
 import * as authApi from '../api/auth';
@@ -14,9 +15,11 @@ describe('Auth Component', () => {
 
   test('renders the login form by default', () => {
     render(
-      <Provider store={store}>
-        <Auth />
-      </Provider>
+      <MemoryRouter>
+        <Provider store={store}>
+          <Auth />
+        </Provider>
+      </MemoryRouter>
     );
 
     // Check for the tab buttons
@@ -32,9 +35,11 @@ describe('Auth Component', () => {
 
   test('shows the register form with password confirmation when the register tab is clicked', () => {
     render(
-      <Provider store={store}>
-        <Auth />
-      </Provider>
+      <MemoryRouter>
+        <Provider store={store}>
+          <Auth />
+        </Provider>
+      </MemoryRouter>
     );
 
     const registerTab = screen.getByRole('tab', { name: 'הרשמה' });
@@ -50,9 +55,11 @@ describe('Auth Component', () => {
     const registerMock = vi.spyOn(authApi, 'register');
 
     render(
-      <Provider store={store}>
-        <Auth />
-      </Provider>
+      <MemoryRouter>
+        <Provider store={store}>
+          <Auth />
+        </Provider>
+      </MemoryRouter>
     );
 
     const registerTab = screen.getByRole('tab', { name: 'הרשמה' });
@@ -73,9 +80,11 @@ describe('Auth Component', () => {
     const registerMock = vi.spyOn(authApi, 'register').mockResolvedValue({ data: {} });
 
     render(
-      <Provider store={store}>
-        <Auth />
-      </Provider>
+      <MemoryRouter>
+        <Provider store={store}>
+          <Auth />
+        </Provider>
+      </MemoryRouter>
     );
 
     const registerTab = screen.getByRole('tab', { name: 'הרשמה' });
@@ -102,4 +111,3 @@ describe('Auth Component', () => {
     });
   });
 });
-

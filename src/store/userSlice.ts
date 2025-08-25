@@ -12,20 +12,9 @@ interface UserState {
   isAuthenticated: boolean;
 }
 
-const storedUser = localStorage.getItem('user');
-let user = null;
-if (storedUser && storedUser !== 'undefined') {
-  try {
-    user = JSON.parse(storedUser);
-  } catch (e) {
-    console.error('Failed to parse user from localStorage', e);
-    user = null;
-  }
-}
-
 const initialState: UserState = {
-  user,
-  isAuthenticated: !!user,
+  user: null,
+  isAuthenticated: false,
 };
 
 const userSlice = createSlice({
@@ -35,16 +24,16 @@ const userSlice = createSlice({
     loginSuccess(state, action: PayloadAction<{ user: User }>) {
       state.isAuthenticated = true;
       state.user = action.payload.user;
-      localStorage.setItem('user', JSON.stringify(action.payload.user));
     },
     logout(state) {
       state.isAuthenticated = false;
       state.user = null;
-      localStorage.removeItem('user');
+    },
+    setAuthenticated(state, action: PayloadAction<boolean>) {
+      state.isAuthenticated = action.payload;
     },
   },
 });
 
-export const { loginSuccess, logout } = userSlice.actions;
+export const { loginSuccess, logout, setAuthenticated } = userSlice.actions;
 export default userSlice.reducer;
-

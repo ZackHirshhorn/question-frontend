@@ -14,7 +14,7 @@ describe('Auth API Integration', () => {
     vi.spyOn(axiosClient, 'post').mockRejectedValue({
       isAxiosError: true,
       response: { status: 401, data: { message: 'Unauthorized' } },
-    } as any);
+    } as unknown);
 
     try {
       await login(invalidCredentials);

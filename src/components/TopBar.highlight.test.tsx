@@ -5,7 +5,9 @@ vi.mock('react-router-dom', async () => {
   return {
     ...actual,
     useLocation: () => ({ pathname: '/templates' }),
-    Link: ({ to, children, style }: any) => <a href={to} style={style}>{children}</a>,
+    Link: ({ to, children, style }: { to: string; children: React.ReactNode; style?: React.CSSProperties }) => (
+      <a href={to} style={style}>{children}</a>
+    ),
   };
 });
 
@@ -20,4 +22,3 @@ describe('TopBar highlighting', () => {
     expect(responsesLink).not.toHaveStyle({ textDecoration: 'underline' });
   });
 });
-

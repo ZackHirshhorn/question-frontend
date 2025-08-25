@@ -13,6 +13,7 @@
     overflow-y: auto; /* allow scrolling when content is tall */
     padding: 40px 0; /* space so top/bottom can be revealed */
     box-sizing: border-box;
+    z-index: 2000; /* above header/burger and dropdowns */
   }
 
   /* Centered variant for lightweight confirm dialogs */
@@ -33,15 +34,54 @@
   .popup-content.popup-content--square {
     border-radius: 0;
     width: 100%;
-    max-width: 800px; /* Match .main-container max width */
+    max-width: 1129px; /* Match .main-container max width */
     padding: 36px 96px; /* vertical horizontal */
     margin: 0; /* overlay padding handles top/bottom spacing */
+    position: relative; /* allow absolutely positioned exit button */
+  }
+
+  /* Header now groups title + subtitle only */
+  .popup-header {
+    display: block;
+    direction: rtl;
+    margin-bottom: 20px;
+  }
+
+  .popup-close-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+    padding: 8px;
+    color: #000;
+    position: absolute;
+    top: 40px;
+    inset-inline-end: 40px; /* 40px from the end edge in RTL/LTR */
+    z-index: 1;
+  }
+
+  .popup-close-button:focus {
+    outline: 2px solid #7686E0;
+    border-radius: 4px;
   }
 
   /* Input style overrides for CreateQuestionsCol popup */
   .popup-content.popup-content--square .input-wrapper {
     border: 1px solid #EDEDEF;
     border-radius: 4px;
+    padding: 6px 8px; /* tighter vertical padding inside border */
+  }
+
+  /* Reduce vertical padding inside the input as well */
+  .popup-content.popup-content--square .input-wrapper input {
+    padding: 6px 0; /* was 8px 0 in base */
+  }
+
+  /* Muted state before first focus */
+  .popup-content.popup-content--square .input-wrapper.input-wrapper--muted {
+    border: none;
+    background-color: #F6F6F9; /* gray the entire bordered area */
   }
 
   /* Focus border color for inputs inside the square popup */
@@ -49,8 +89,8 @@
     border-color: #7686E0;
   }
 
-  /* Remove focus background for inputs in the square popup */
-  .popup-content.popup-content--square .input-wrapper input:focus {
+  /* Ensure inputs inside popups have transparent background */
+  .popup-content input {
     background-color: transparent;
   }
 
@@ -62,6 +102,16 @@
     letter-spacing: 0;
     text-align: right;
     color: #909090;
+  }
+
+  /* Placeholder typography for preview popup text inputs */
+  .popup-content.popup-content--square .preview-text-input::placeholder {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400; /* Regular */
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
   }
 
   .popup-content.popup-content--square .input-wrapper input {
@@ -133,21 +183,31 @@
   }
 
   .button-add-question {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    font-weight: 400; /* Regular */
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; /* Inter preferred */
+    font-weight: 400;
+    font-style: normal; /* Regular */
     font-size: 16px;
+    leading-trim: CAP_HEIGHT;
     line-height: 100%;
-    letter-spacing: 0;
+    letter-spacing: 0%;
+    text-align: right;
     /* Robust centering for any content (text + icons) */
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    background-color: #E6EAFF;
-    border: 1px solid #0957D0;
+    background-color: #EDEDEF; /* default background */
+    border: 1px solid #B3B3B3; /* default border */
     border-radius: 4px;
     width: 302px;
     padding: 10px 12px;
     cursor: pointer;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    color: #909090; /* text color always */
+  }
+
+  .button-add-question:hover {
+    background-color: #E6EAFF; /* hover background */
+    border-color: #7686E0; /* hover border */
   }
 
   .popup-divider {
@@ -193,20 +253,25 @@
   .popup-question-text {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     font-weight: 600; /* Semi Bold */
+    font-style: normal; /* Semi Bold */
     font-size: 18px;
+    leading-trim: none;
     line-height: 100%;
-    letter-spacing: 0;
+    letter-spacing: 0%;
     text-align: right;
+    color: #000000;
   }
 
   .popup-question-meta {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     font-weight: 400; /* Regular */
+    font-style: normal; /* Regular */
     font-size: 16px;
+    leading-trim: CAP_HEIGHT;
     line-height: 100%;
-    letter-spacing: 0;
+    letter-spacing: 0%;
     text-align: right;
-    color: #666666;
+    color: #000000;
   }
 
   .popup-question-actions {
@@ -361,6 +426,116 @@
     background-color: transparent;
   }
 
+  /* Dropdown option hover styling for question type selector */
+  .popup-content.popup-content--square .question-form-grid select option:hover {
+    background-color: #E6EAFF;
+  }
+  .popup-content.popup-content--square .question-form-grid select option:focus {
+    background-color: #E6EAFF;
+  }
+  .popup-content.popup-content--square .question-form-grid select option:active {
+    background-color: #E6EAFF;
+  }
+
+  /* Custom select (TypeSelect) */
+  .popup-content.popup-content--square .custom-select {
+    position: relative;
+    width: 100%;
+    max-width: 302px;
+  }
+
+  .popup-content.popup-content--square .custom-select-trigger {
+    width: 100%;
+    height: 40px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #EDEDEF;
+    border-radius: 4px;
+    background: #FFFFFF;
+    padding: 0 8px;
+    cursor: pointer;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+  }
+
+  .popup-content.popup-content--square .custom-select-trigger:focus {
+    outline: none;
+    border-color: #7686E0;
+  }
+
+  .popup-content.popup-content--square .custom-select-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-inline-end: 8px;
+  }
+
+  .popup-content.popup-content--square .custom-select-caret {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+  }
+
+  .popup-content.popup-content--square .custom-select-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0; /* RTL alignment */
+    z-index: 20;
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+    background: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    /* Figma shadow */
+    box-shadow: 0px 1px 2px 0px #0000004D;
+    min-width: 100%;
+    max-height: 280px;
+    overflow: auto;
+  }
+
+  .popup-content.popup-content--square .custom-select-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: rtl; /* keep text/icon order intuitive in RTL */
+  }
+
+  .popup-content.popup-content--square .custom-select-option:hover,
+  .popup-content.popup-content--square .custom-select-option.is-active {
+    background-color: #E6EAFF;
+  }
+
+  /* Remove checkmark; custom icons are shown instead */
+  .popup-content.popup-content--square .custom-select-option.is-selected::after { content: none; }
+
+  .popup-content.popup-content--square .custom-select-option-icon {
+    width: 20px;
+    min-width: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .popup-content.popup-content--square .custom-select-option-text {
+    flex: 1 1 auto;
+  }
+
   /* Ensure text input wrapper matches select dimensions */
   .popup-content.popup-content--square .question-form-grid .input-wrapper {
     max-width: 302px;
@@ -476,7 +651,7 @@
   }
   
   .error-message {
-    color: red;
+    color: #B00020; /* unify with popup-warning */
     margin-bottom: 15px;
   }
   
@@ -533,15 +708,23 @@
     margin-bottom: 16px;
   }
 
+  /* Reduce gap between title and subtitle in square popup */
+  .popup-content.popup-content--square h2 {
+    margin-bottom: 8px;
+  }
+
   /* Subtitle under popup title */
   .popup-subtitle {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    font-weight: 400; /* Regular */
+    font-weight: 400;
+    font-style: normal; /* Regular */
     font-size: 16px;
+    leading-trim: CAP_HEIGHT;
     line-height: 100%;
-    letter-spacing: 0;
+    letter-spacing: 0%;
     text-align: right;
-    margin: 0 0 20px 0;
+    color: #909090;
+    margin: 0;
   }
 
   .popup-warning {
