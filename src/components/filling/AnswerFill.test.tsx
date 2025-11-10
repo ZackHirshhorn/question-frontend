@@ -96,8 +96,10 @@ describe('AnswerFill user info panel', () => {
       </Provider>
     );
 
-    const saveButton = await screen.findByRole('button', { name: 'שמירה' });
-    expect(saveButton).toBeEnabled();
+    const saveButton = screen.getByRole('button', { name: 'שמירה' });
+    expect(saveButton).toBeDisabled();
+
+    await waitFor(() => expect(saveButton).toBeEnabled());
 
     fireEvent.click(saveButton);
 
