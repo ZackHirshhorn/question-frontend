@@ -10,16 +10,23 @@ const AnimatedErrorMessage: React.FC<AnimatedErrorMessageProps> = ({ message }) 
   const [show, setShow] = useState(!!message);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
     if (message) {
       setDisplayMessage(message);
       setShow(true);
     } else {
       setShow(false);
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         setDisplayMessage('');
       }, 300); // Must match the CSS transition duration
-      return () => clearTimeout(timer);
     }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [message]);
 
   if (!displayMessage) {

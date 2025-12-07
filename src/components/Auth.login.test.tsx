@@ -17,7 +17,7 @@ describe('Auth login flow', () => {
   };
 
   it('logs in and redirects on success', async () => {
-    vi.spyOn(authApi, 'login').mockResolvedValue({ data: { id: '1', name: 'U', email: 'u@e.com', role: 'user' } } as unknown as ReturnType<typeof authApi.login>);
+    vi.spyOn(authApi, 'login').mockResolvedValue({ data: { id: '1', name: 'U', email: 'u@e.com', role: 'user' } } as unknown as Awaited<ReturnType<typeof authApi.login>>);
 
     render(
       <MemoryRouter initialEntries={["/login"]}>
