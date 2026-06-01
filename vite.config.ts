@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   const apiBaseUrl = env['VITE_API_BASE_URL'];
 
   return {
-    base: '/question-frontend-demo/',
+    base: '/',
     plugins: [react()],
     server: {
       proxy: {
