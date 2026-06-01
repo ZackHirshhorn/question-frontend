@@ -9,7 +9,7 @@ import './index.css';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter basename="/question-frontend-demo">
+      <BrowserRouter>
         <App />
       </BrowserRouter>
     </Provider>
