@@ -55,6 +55,10 @@ function App() {
     })();
   }, [dispatch]);
 
+  if (bootstrapping) {
+    return null;
+  }
+
   return (
     <>
       {isAuthenticated && (
@@ -75,15 +79,13 @@ function App() {
           <Route path="/login" element={<Auth />} />
 
           {/* Protected routes */}
-          {!bootstrapping && (
-            <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />}>
-              <Route path="/" element={<Templates onTemplateClick={handleSelectTemplate} />} />
-              <Route path="/templates" element={<Templates onTemplateClick={handleSelectTemplate} />} />
-              <Route path="/templates/:templateId" element={<TemplateView onBack={handleBack} />} />
-              <Route path="/responses" element={<Responses />} />
-              <Route path="/questions" element={<Questions />} />
-            </Route>
-          )}
+          <Route element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />}>
+            <Route path="/" element={<Templates onTemplateClick={handleSelectTemplate} />} />
+            <Route path="/templates" element={<Templates onTemplateClick={handleSelectTemplate} />} />
+            <Route path="/templates/:templateId" element={<TemplateView onBack={handleBack} />} />
+            <Route path="/responses" element={<Responses />} />
+            <Route path="/questions" element={<Questions />} />
+          </Route>
         </Routes>
       </div>
     </>
